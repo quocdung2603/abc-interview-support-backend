@@ -1,0 +1,147 @@
+version: "3.8"
+
+name: microstack
+
+networks:
+  micro-net:
+
+volumes:
+  pgdata:
+  config_repo:   # mount repo cấu hình vào config-service
+
+services:
+  # ====== INFRA ======
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5433:5432"         # host 5433 -> container 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks: [micro-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks: [micro-net]
+
+  # ====== CONFIG ======
+  config-service:
+    build: ./config-service
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    # Mount thư mục cấu hình vào /config-repo
+    volumes:
+      - ./config-repo:/config-repo
+    environment:
+      # Trỏ config-server tới thư mục đã mount
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: file:/config-repo
+      # Nếu có nhánh khác: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
+    networks: [micro-net]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # ====== DISCOVERY (Eureka) ======
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+    depends_on:
+      config-service:
+        condition: service_healthy
+    networks: [micro-net]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # ====== API GATEWAY ======
+  api-gateway:
+    build: ./gateway-service
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      # Nếu bạn không dùng config-repo cho gateway, có thể truyền trực tiếp:
+      # EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
+    depends_on:
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks: [micro-net]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # ====== USER SERVICE ======
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      # Nếu KHÔNG dùng config-repo, bỏ dòng trên và bật các dòng dưới:
+      # SPRING_APPLICATION_NAME: user-service
+      # EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/userservice
+      # SPRING_DATASOURCE_USERNAME: postgres
+      # SPRING_DATASOURCE_PASSWORD: 123456
+      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    networks: [micro-net]
+
+  # ====== AUTH SERVICE ======
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      # Nếu KHÔNG dùng config-repo, truyền trực tiếp (ví dụ):
+      # SPRING_APPLICATION_NAME: auth-service
+      # EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/authdb
+      # SPRING_DATASOURCE_USERNAME: postgres
+      # SPRING_DATASOURCE_PASSWORD: 123456
+      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # spring.mail.* / jwt.* / app.base-url cũng có thể truyền qua env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    networks: [micro-net]

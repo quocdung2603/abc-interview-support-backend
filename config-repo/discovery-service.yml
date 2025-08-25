@@ -1,0 +1,19 @@
+server:
+  port: 8761
+
+eureka:
+  client:
+    enabled: false            # <- QUAN TRỌNG: tắt hẳn eureka client
+    register-with-eureka: false
+    fetch-registry: false
+
+spring:
+  cloud:
+    discovery:
+      enabled: false          # <- tắt discovery client chung
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

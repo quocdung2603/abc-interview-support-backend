@@ -1,0 +1,14 @@
+server:
+  port: 8080
+spring:
+  application.name: api-gateway
+  cloud:
+    gateway:
+      discovery.locator.enabled: true      # tự map từ eureka
+      routes:
+        - id: user
+          uri: lb://user-service
+          predicates: [ Path=/users/** ]
+        - id: exam
+          uri: lb://exam-service
+          predicates: [ Path=/exams/** ]
