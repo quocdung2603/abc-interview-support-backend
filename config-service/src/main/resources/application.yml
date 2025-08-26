@@ -1,0 +1,22 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  security:
+    user:
+      name: configuser
+      password: configpass  # ??n gi?n ?? demo
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:///${user.home}/micro/config-repo    # ho?c ../config-repo
+          default-label: main
+          search-paths: .
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env
