@@ -7,7 +7,7 @@ networks:
 
 volumes:
   pgdata:
-  config_repo:   # mount repo cấu hình vào config-service
+  config_repo:
 
 services:
   # ====== INFRA ======
@@ -18,7 +18,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
     ports:
-      - "5433:5432"         # host 5433 -> container 5432
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -47,13 +47,11 @@ services:
     container_name: config-service
     ports:
       - "8888:8888"
-    # Mount thư mục cấu hình vào /config-repo
     volumes:
       - ./config-repo:/config-repo
     environment:
-      # Trỏ config-server tới thư mục đã mount
       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: file:/config-repo
-      # Nếu có nhánh khác: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
+      # SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
     networks: [micro-net]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
@@ -68,16 +66,28 @@ services:
     ports:
       - "8761:8761"
     environment:
+      SPRING_APPLICATION_NAME: discovery-service
+      SERVER_PORT: 8761
+      # Kéo cấu hình từ Config Server (có basic auth)
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
+      SPRING_CLOUD_CONFIG_USERNAME: configuser
+      SPRING_CLOUD_CONFIG_PASSWORD: configpass
+      # Nếu backend là Git với nhánh main:
+      SPRING_CLOUD_CONFIG_PROFILE: default
+      SPRING_CLOUD_CONFIG_LABEL: main
+      # Eureka server KHÔNG tự đăng ký / fetch
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
     depends_on:
       config-service:
         condition: service_healthy
-    networks: [micro-net]
+    networks: [ micro-net ]
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8761/actuator/health" ]
       interval: 5s
       timeout: 3s
       retries: 30
+
 
   # ====== API GATEWAY ======
   api-gateway:
@@ -86,9 +96,9 @@ services:
     ports:
       - "8080:8080"
     environment:
+      SPRING_APPLICATION_NAME: gateway-service
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
-      # Nếu bạn không dùng config-repo cho gateway, có thể truyền trực tiếp:
-      # EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
       config-service:
         condition: service_healthy
@@ -106,14 +116,11 @@ services:
     build: ./user-service
     container_name: user-service
     environment:
+      SPRING_APPLICATION_NAME: user-service
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
-      # Nếu KHÔNG dùng config-repo, bỏ dòng trên và bật các dòng dưới:
-      # SPRING_APPLICATION_NAME: user-service
-      # EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/userservice
-      # SPRING_DATASOURCE_USERNAME: postgres
-      # SPRING_DATASOURCE_PASSWORD: 123456
-      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      # Ép port để tránh mặc định 8080 (nếu config-repo chưa có server.port)
+      SERVER_PORT: 8082
     depends_on:
       postgres:
         condition: service_healthy
@@ -122,21 +129,26 @@ services:
       config-service:
         condition: service_healthy
     networks: [micro-net]
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
 
   # ====== AUTH SERVICE ======
   auth-service:
     build: ./auth-service
     container_name: auth-service
     environment:
+      SPRING_APPLICATION_NAME: auth-service
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-service:8888
-      # Nếu KHÔNG dùng config-repo, truyền trực tiếp (ví dụ):
-      # SPRING_APPLICATION_NAME: auth-service
-      # EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/authdb
-      # SPRING_DATASOURCE_USERNAME: postgres
-      # SPRING_DATASOURCE_PASSWORD: 123456
-      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      # spring.mail.* / jwt.* / app.base-url cũng có thể truyền qua env
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      # Ép port cho thống nhất
+      SERVER_PORT: 8081
+      # Gợi ý: JWT_SECRET nên set trong config-repo (auth-service.yml)
+      # JWT_SECRET: base64:PASTE_A_LONG_BASE64_SECRET_HERE
     depends_on:
       postgres:
         condition: service_healthy
@@ -145,3 +157,10 @@ services:
       config-service:
         condition: service_healthy
     networks: [micro-net]
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30

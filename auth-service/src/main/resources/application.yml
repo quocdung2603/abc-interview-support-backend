@@ -32,7 +32,7 @@ eureka:
       defaultZone: http://discovery-service:8761/eureka
 
 jwt:
-  secret: "4D2224546D8817FCFAB272A7FC9F9"
+  secret: "UCIafMmHwgsJKIgg4xVAL/eOvR3ZXD/ZnYE9AfMaMQg="
   access-minutes: 30
   refresh-days: 7
 

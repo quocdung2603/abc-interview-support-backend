@@ -1,19 +1,14 @@
+# discovery-service/src/main/resources/application.yml
 server:
-  port: 8761
-
-eureka:
-  client:
-    enabled: false
-    register-with-eureka: false
-    fetch-registry: false
+  port: 8761   # fallback nếu chưa kéo được config
 
 spring:
+  application:
+    name: discovery-service
+  config:
+    import: optional:configserver:http://config-service:8888
   cloud:
-    discovery:
-      enabled: false
+    config:
+      username: configuser
+      password: configpass
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
