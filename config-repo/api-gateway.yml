@@ -1,14 +1,35 @@
 server:
   port: 8080
+
 spring:
-  application.name: api-gateway
+  application:
+    name: api-gateway
   cloud:
     gateway:
-      discovery.locator.enabled: true      # tự map từ eureka
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
+        - id: auth
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
         - id: user
           uri: lb://user-service
-          predicates: [ Path=/users/** ]
+          predicates:
+            - Path=/users/**
         - id: exam
           uri: lb://exam-service
-          predicates: [ Path=/exams/** ]
+          predicates:
+            - Path=/exams/**
+      # CORS cho môi trường dev
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      # tránh trùng header CORS
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
