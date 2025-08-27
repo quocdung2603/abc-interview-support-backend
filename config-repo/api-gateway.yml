@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: api-gateway
+  # nếu đang dùng Config Server trong docker compose:
+  config:
+    import: optional:configserver:http://config-service:8888
+
   cloud:
     gateway:
       discovery:
@@ -11,25 +15,38 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: auth
+        - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/auth/**
-        - id: user
+        - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/users/**
-        - id: exam
+        - id: exam-service
           uri: lb://exam-service
           predicates:
             - Path=/exams/**
-      # CORS cho môi trường dev
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
-      # tránh trùng header CORS
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        # thêm chiến lược để tránh cảnh báo cấu hình
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+
+eureka:
+  client:
+    service-url:
+      # CHỌN đúng cổng mà discovery đang lắng nghe trong container
+      defaultZone: http://discovery-service:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
