@@ -18,6 +18,6 @@ public interface UserClient {
 
     @PostMapping("/users/login")
     UserDto login(@RequestBody LoginRequest request);
-    @PostMapping
+    @PostMapping("/users")
     UserDto create(@RequestBody RegisterRequest request);
 }
