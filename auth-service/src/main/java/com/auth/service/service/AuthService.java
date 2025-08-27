@@ -23,12 +23,9 @@ public class AuthService {
         String refresh = jwtService.generateRefreshToken(user);
         return new TokenResponse(access, refresh);
     }
-    public TokenResponse register(RegisterRequest request) {
+    public UserDto  register(RegisterRequest request) {
         try {
-            UserDto created = userClient.create(request);  // gọi sang user-service
-            String access = jwtService.generateAccessToken(created);
-            String refresh = jwtService.generateRefreshToken(created);
-            return new TokenResponse(access, refresh);
+            return userClient.create(request);
         } catch (FeignException.Conflict e) {
             // ví dụ user-service trả 409 nếu email trùng
             throw new RuntimeException("Email đã tồn tại");

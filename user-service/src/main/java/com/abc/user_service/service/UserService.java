@@ -6,7 +6,10 @@ import com.abc.user_service.entity.*;
 import com.abc.user_service.mapper.UserMapper;
 import com.abc.user_service.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +20,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final EloHistoryRepository eloHistoryRepository;
     private final UserMapper userMapper;
+    private final EmailService emailService;
 
     public UserResponse create(UserRequest request) {
         User user = userMapper.toEntity(request);
@@ -26,8 +30,11 @@ public class UserService {
         user.setStatus(UserStatus.PENDING);
         user.setEloScore(0);
         user.setEloRank(EloRank.NEWBIE);
+        user.setVerifyToken(java.util.UUID.randomUUID().toString());
         user.setCreatedAt(LocalDateTime.now());
-        return userMapper.toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        emailService.sendVerificationEmailHtml(saved.getEmail(), saved.getVerifyToken());
+        return userMapper.toResponse(saved);
     }
 
     public UserResponse getById(Long id) {
@@ -43,9 +50,21 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
-    public UserResponse verify(VerifyRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    @Transactional
+    public UserResponse verify(String token) {
+        if (token == null || token.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing token");
+        }
+
+        User user = userRepository.findByVerifyToken(token)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid token"));
+
+        if (user.getStatus() == UserStatus.VERIFIED) {
+            // có thể trả luôn trạng thái đã xác minh
+            return userMapper.toResponse(user);
+        }
+
+        user.setVerifyToken(null);
         user.setStatus(UserStatus.VERIFIED);
         return userMapper.toResponse(userRepository.save(user));
     }

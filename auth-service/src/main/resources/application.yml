@@ -1,9 +1,19 @@
 server:
-  port: 8082
+  port: 8081
 
 spring:
   application:
     name: auth-service
+  config:
+    import: optional:configserver:http://config-service:8888
+  cloud:
+    config:
+      uri: http://config-service:8888
+      fail-fast: false
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+        max-interval: 2000
   datasource:
     url: jdbc:postgresql://postgres:5432/authdb
     username: postgres
@@ -11,9 +21,8 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
-
   mail:
     host: smtp.gmail.com
     port: 587
@@ -26,17 +35,21 @@ spring:
       mail.smtp.timeout: 10000
       mail.smtp.writetimeout: 10000
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://discovery-service:8761/eureka
+app:
+  verification-url: "http://gateway-service:8080/auth/verify"
 
 jwt:
   secret: "UCIafMmHwgsJKIgg4xVAL/eOvR3ZXD/ZnYE9AfMaMQg="
   access-minutes: 30
   refresh-days: 7
 
-app:
-  base-url: http://localhost:8080
-  verify:
-    expiry-minutes: 30
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+    registryFetchIntervalSeconds: 5
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}

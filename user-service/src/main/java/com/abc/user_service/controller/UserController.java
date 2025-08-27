@@ -28,9 +28,9 @@ public class UserController {
         return userService.login(request);
     }
 
-    @PostMapping("/verify")
-    public UserResponse verify(@Valid @RequestBody VerifyRequest request) {
-        return userService.verify(request);
+    @GetMapping("/verify")
+    public UserResponse verify(@RequestParam("token") String token) {
+        return userService.verify(token);
     }
 
     @PutMapping("/{id}/role")

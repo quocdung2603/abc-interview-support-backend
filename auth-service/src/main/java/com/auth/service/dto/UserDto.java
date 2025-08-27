@@ -8,4 +8,5 @@ public class UserDto {
     private Long roleId;
     private String email;
     private String fullName;
+    private String verifyToken;
 }

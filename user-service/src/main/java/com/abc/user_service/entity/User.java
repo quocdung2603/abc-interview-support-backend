@@ -46,5 +46,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private EloRank eloRank;
 
+    @Column(length = 255)
+    private String verifyToken;
+
     private LocalDateTime createdAt;
 }

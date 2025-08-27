@@ -4,27 +4,25 @@ server:
 spring:
   application:
     name: api-gateway
-  # nếu đang dùng Config Server trong docker compose:
   config:
     import: optional:configserver:http://config-service:8888
-
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
+          lower-case-service-id: false # Sửa thành false
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: lb://AUTH-SERVICE # In hoa
           predicates:
             - Path=/auth/**
         - id: user-service
-          uri: lb://user-service
+          uri: lb://USER-SERVICE # In hoa
           predicates:
             - Path=/users/**
         - id: exam-service
-          uri: lb://exam-service
+          uri: lb://EXAM-SERVICE # In hoa
           predicates:
             - Path=/exams/**
       globalcors:
@@ -34,14 +32,21 @@ spring:
             allowedMethods: "*"
             allowedHeaders: "*"
       default-filters:
-        # thêm chiến lược để tránh cảnh báo cấu hình
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+    config:
+      uri: http://config-service:8888
+      fail-fast: false
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+        max-interval: 2000
 
 eureka:
   client:
     service-url:
-      # CHỌN đúng cổng mà discovery đang lắng nghe trong container
-      defaultZone: http://discovery-service:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
     prefer-ip-address: true
 
@@ -49,4 +54,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always

@@ -1,4 +1,19 @@
+server:
+  port: 8082 # Khớp với log (USER-SERVICE chạy trên cổng 8082)
+
 spring:
+  application:
+    name: user-service
+  config:
+    import: optional:configserver:http://config-service:8888 # Thêm optional để tránh dừng ứng dụng
+  cloud:
+    config:
+      uri: http://config-service:8888
+      fail-fast: false # Tạm thời tắt fail-fast
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+        max-interval: 2000
   datasource:
     url: jdbc:postgresql://postgres:5432/userservice
     username: postgres
@@ -6,10 +21,30 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: npminhtri.be@gmail.com
+    password: cfubhnaxnbdzsnta
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
+app:
+  verification-url: "http://gateway-service:8080/users/verify"
 
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery-service:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+    registryFetchIntervalSeconds: 5
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}

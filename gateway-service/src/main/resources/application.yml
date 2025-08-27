@@ -11,18 +11,18 @@ spring:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
+          lower-case-service-id: false # Sửa thành false
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: lb://AUTH-SERVICE # In hoa
           predicates:
             - Path=/auth/**
         - id: user-service
-          uri: lb://user-service
+          uri: lb://USER-SERVICE # In hoa
           predicates:
             - Path=/users/**
         - id: exam-service
-          uri: lb://exam-service
+          uri: lb://EXAM-SERVICE # In hoa
           predicates:
             - Path=/exams/**
       globalcors:
@@ -33,6 +33,13 @@ spring:
             allowedHeaders: "*"
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+    config:
+      uri: http://config-service:8888
+      fail-fast: false
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+        max-interval: 2000
 
 eureka:
   client:
@@ -51,3 +58,5 @@ management:
   endpoint:
     gateway:
       enabled: true
+    health:
+      show-details: always

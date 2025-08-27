@@ -23,11 +23,21 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // Tương đương STATELESS
+                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // Stateless
                 .authorizeExchange(exchanges -> exchanges
+                        // Cho phép health, docs
                         .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
+                        // Cho phép auth
                         .pathMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
-                        .anyExchange().permitAll()
+
+                        // ✅ Cho phép verify qua users-service
+                        .pathMatchers(HttpMethod.GET, "/users/verify").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/users/verify").permitAll()
+
+                        // Các request còn lại cần xác thực
+                        .anyExchange().authenticated()
                 )
                 .build();
     }

@@ -17,9 +17,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@Valid @RequestBody RegisterRequest request) {
-        TokenResponse tokens = authService.register(request);  // gọi user-service tạo user
-        return ResponseEntity.status(HttpStatus.CREATED).body(tokens);
+    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterRequest request) {
+        UserDto user = authService.register(request);  // gọi user-service tạo user
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PostMapping("/login")

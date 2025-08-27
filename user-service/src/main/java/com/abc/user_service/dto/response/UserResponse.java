@@ -20,4 +20,5 @@ public class UserResponse {
     private Integer eloScore;
     private EloRank eloRank;
     private LocalDateTime createdAt;
+    private String verifyToken;
 }
