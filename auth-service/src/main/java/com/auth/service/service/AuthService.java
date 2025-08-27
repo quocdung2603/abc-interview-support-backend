@@ -10,13 +10,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private  UserClient userClient;
-    private  JwtService jwtService;
-
-    public AuthService(UserClient userClient, JwtService jwtService) {
-        this.userClient = userClient;
-        this.jwtService = jwtService;
-    }
+    private final UserClient userClient;
+    private final JwtService jwtService;
 
     public UserDto getUserById(Long id) {
         return userClient.getUserById(id);

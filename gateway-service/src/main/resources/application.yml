@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
+  config:
+    import: optional:configserver:http://config-service:8888
   cloud:
     gateway:
       discovery:
@@ -11,25 +13,41 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: auth
+        - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/auth/**
-        - id: user
+        - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/users/**
-        - id: exam
+        - id: exam-service
           uri: lb://exam-service
           predicates:
             - Path=/exams/**
-      # CORS cho môi trường dev
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
-      # tránh trùng header CORS
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    gateway:
+      enabled: true

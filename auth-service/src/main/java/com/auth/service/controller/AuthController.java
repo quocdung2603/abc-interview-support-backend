@@ -1,5 +1,6 @@
 package com.auth.service.controller;
 
+import com.auth.service.dto.LoginRequest;
 import com.auth.service.dto.*;
 import com.auth.service.service.AuthService;
 import jakarta.validation.Valid;
