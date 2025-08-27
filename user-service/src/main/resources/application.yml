@@ -36,7 +36,7 @@ spring:
       mail.smtp.writetimeout: 10000
 
 app:
-  verification-url: "http://gateway-service:8080/users/verify"
+  verification-url: "http://gateway-service:8080/auth/verify"
 
 eureka:
   client:

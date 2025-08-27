@@ -33,6 +33,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.refresh(request));
     }
 
+    @GetMapping("/verify")
+    public ResponseEntity<TokenResponse> verify(@RequestParam("token") String token) {
+        return ResponseEntity.ok(authService.verify(token));
+    }
+
     // ví dụ: gọi user-service lấy user theo id
     @GetMapping("/users/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {

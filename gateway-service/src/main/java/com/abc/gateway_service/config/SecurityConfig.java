@@ -31,6 +31,8 @@ public class SecurityConfig {
 
                         // Cho phép auth
                         .pathMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/auth/verify").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/auth/verify").permitAll()
 
                         // ✅ Cho phép verify qua users-service
                         .pathMatchers(HttpMethod.GET, "/users/verify").permitAll()

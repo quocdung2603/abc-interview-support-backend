@@ -41,4 +41,11 @@ public class AuthService {
         String refresh = jwtService.generateRefreshToken(user);
         return new TokenResponse(access, refresh);
     }
+
+    public TokenResponse verify(String token) {
+        UserDto user = userClient.verify(token);
+        String access = jwtService.generateAccessToken(user);
+        String refresh = jwtService.generateRefreshToken(user);
+        return new TokenResponse(access, refresh);
+    }
 }
