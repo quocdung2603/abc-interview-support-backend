@@ -11,18 +11,18 @@ spring:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: false # Sửa thành false
+          lower-case-service-id: false
       routes:
         - id: auth-service
-          uri: lb://AUTH-SERVICE # In hoa
+          uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
         - id: user-service
-          uri: lb://USER-SERVICE # In hoa
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
         - id: exam-service
-          uri: lb://EXAM-SERVICE # In hoa
+          uri: lb://EXAM-SERVICE
           predicates:
             - Path=/exams/**
       globalcors:

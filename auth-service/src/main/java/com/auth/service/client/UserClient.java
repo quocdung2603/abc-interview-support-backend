@@ -5,10 +5,7 @@ import com.auth.service.dto.LoginRequest;
 import com.auth.service.dto.RegisterRequest;
 import com.auth.service.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "user-service")
 public interface UserClient {
@@ -20,4 +17,7 @@ public interface UserClient {
     UserDto login(@RequestBody LoginRequest request);
     @PostMapping("/users")
     UserDto create(@RequestBody RegisterRequest request);
+
+    @GetMapping("/users/verify")
+    UserDto verify(@RequestParam("token") String token);
 }
