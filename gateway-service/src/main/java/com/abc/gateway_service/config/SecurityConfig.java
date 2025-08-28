@@ -29,14 +29,20 @@ public class SecurityConfig {
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // Cho phép auth
-                        .pathMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/auth/verify").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/auth/verify").permitAll()
+                        // Allow auth endpoints with or without an `/api` prefix
+                        .pathMatchers(HttpMethod.POST,
+                                "/auth/register", "/auth/login",
+                                "/api/auth/register", "/api/auth/login").permitAll()
+                        .pathMatchers(HttpMethod.GET,
+                                "/auth/verify", "/api/auth/verify").permitAll()
+                        .pathMatchers(HttpMethod.POST,
+                                "/auth/verify", "/api/auth/verify").permitAll()
 
-                        // ✅ Cho phép verify qua users-service
-                        .pathMatchers(HttpMethod.GET, "/users/verify").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/users/verify").permitAll()
+                        // ✅ Allow user-service verify endpoints (also support `/api` prefix)
+                        .pathMatchers(HttpMethod.GET,
+                                "/users/verify", "/api/users/verify").permitAll()
+                        .pathMatchers(HttpMethod.POST,
+                                "/users/verify", "/api/users/verify").permitAll()
 
                         // Các request còn lại cần xác thực
                         .anyExchange().authenticated()

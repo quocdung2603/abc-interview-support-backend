@@ -27,10 +27,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Sửa cho đúng path thực tế của bạn (có /api hay không)
-                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/auth/verify").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/verify").permitAll()
+                        // Permit auth endpoints with or without an `/api` prefix
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/register", "/auth/login",
+                                "/api/auth/register", "/api/auth/login"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/auth/verify", "/api/auth/verify"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/verify", "/api/auth/verify"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
