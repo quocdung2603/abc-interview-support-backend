@@ -290,7 +290,7 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userId\": 1,\n  \"eloChange\": 100\n}"
+							"raw": "{\n  \"userId\": 1,\n  \"action\": \"WIN\",\n  \"points\": 50,\n  \"description\": \"Won exam with high score\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users/elo",
@@ -1522,7 +1522,7 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userId\": 1,\n  \"fieldId\": 1,\n  \"levelId\": 2,\n  \"desiredPosition\": \"Senior Backend Developer\",\n  \"desiredSalary\": \"2000 USD\",\n  \"desiredLocation\": \"Hanoi or Remote\"\n}"
+							"raw": "{\n  \"userId\": 1,\n  \"fieldId\": 1,\n  \"topicId\": 1\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/career",
@@ -1538,7 +1538,7 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userId\": 1,\n  \"fieldId\": 1,\n  \"levelId\": 3,\n  \"desiredPosition\": \"Lead Developer\",\n  \"desiredSalary\": \"3000 USD\",\n  \"desiredLocation\": \"Remote Only\"\n}"
+							"raw": "{\n  \"userId\": 1,\n  \"fieldId\": 1,\n  \"topicId\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/career/update/1",
