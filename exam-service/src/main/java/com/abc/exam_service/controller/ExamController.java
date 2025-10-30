@@ -68,13 +68,13 @@ public class ExamController {
 
     @PostMapping("/results")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResultResponse submitResult(@RequestBody ResultRequest req) {
+    public ResultResponse submitResult(@jakarta.validation.Valid @RequestBody ResultRequest req) {
         return examService.submitResult(req);
     }
 
     @PostMapping("/answers")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public UserAnswerResponse submitAnswer(@RequestBody UserAnswerRequest req) {
+    public UserAnswerResponse submitAnswer(@jakarta.validation.Valid @RequestBody UserAnswerRequest req) {
         return examService.submitAnswer(req);
     }
 

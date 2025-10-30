@@ -1,6 +1,7 @@
 package com.abc.gateway_service.config;
 
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,7 @@ public class GatewayConfig {
                     // Forward Authorization header as-is; in future decode JWT and add claims
                     HttpHeaders headers = exchange.getRequest().getHeaders();
                     String auth = headers.getFirst(HttpHeaders.AUTHORIZATION);
-                    ServerWebExchange mutated = exchange.mutate(e -> {})
+                    ServerWebExchange mutated = exchange.mutate()
                             .request(builder -> {
                                 if (auth != null) {
                                     builder.header("X-User-Authorization", auth);

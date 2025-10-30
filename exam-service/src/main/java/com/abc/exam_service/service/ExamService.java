@@ -69,12 +69,18 @@ public class ExamService {
 
     public ResultResponse submitResult(ResultRequest req) {
         Result result = mappers.toEntity(req);
+        // Link to Exam entity to enable queries like findByExamId
+        Exam exam = examRepository.findById(req.getExamId()).orElseThrow();
+        result.setExam(exam);
         result.setCompletedAt(LocalDateTime.now());
         return mappers.toResponse(resultRepository.save(result));
     }
 
     public UserAnswerResponse submitAnswer(UserAnswerRequest req) {
         UserAnswer answer = mappers.toEntity(req);
+        // Link to Exam entity to enable queries like findByExamIdAndUserId
+        Exam exam = examRepository.findById(req.getExamId()).orElseThrow();
+        answer.setExam(exam);
         answer.setCreatedAt(LocalDateTime.now());
         return mappers.toResponse(userAnswerRepository.save(answer));
     }

@@ -31,38 +31,40 @@ function Import-SqlFile {
         [string]$SqlFile,
         [string]$Description
     )
-    
+
     Write-Host "Importing $Description..." -ForegroundColor Yellow
-    
+
     $env:PGPASSWORD = $PG_PASSWORD
-    $command = "psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $Database -f `"$SqlFile`""
-    
+    # Build psql argument list to avoid quoting issues
+    $args = @('-h', $PG_HOST, '-p', $PG_PORT, '-U', $PG_USER, '-d', $Database, '-f', $SqlFile)
+
     try {
-        Invoke-Expression $command
+        & psql @args
         if ($LASTEXITCODE -eq 0) {
             Write-Host "✓ $Description imported successfully!" -ForegroundColor Green
         } else {
-            Write-Host "✗ Failed to import $Description" -ForegroundColor Red
+            Write-Host "✗ Failed to import $Description (exit code $LASTEXITCODE)" -ForegroundColor Red
             return $false
         }
     } catch {
         Write-Host "✗ Error importing $Description : $($_.Exception.Message)" -ForegroundColor Red
         return $false
     }
-    
+
     return $true
 }
 
 # Function to check if database exists
 function Test-DatabaseExists {
     param([string]$Database)
-    
+
     $env:PGPASSWORD = $PG_PASSWORD
-    $command = "psql -h $PG_HOST -p $PG_PORT -U $PG_USER -lqt | cut -d \| -f 1 | grep -qw `"$Database`""
-    
+    # Query pg_database in a portable way (no grep/cut required)
+    $query = "SELECT 1 FROM pg_database WHERE datname='$Database'"
     try {
-        Invoke-Expression $command
-        return $LASTEXITCODE -eq 0
+        $result = & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -tAc $query 2>$null
+        if ($LASTEXITCODE -ne 0) { return $false }
+        return ($result.Trim() -eq '1')
     } catch {
         return $false
     }
@@ -73,9 +75,9 @@ Write-Host "Checking prerequisites..." -ForegroundColor Yellow
 
 # Check if PostgreSQL is accessible
 $env:PGPASSWORD = $PG_PASSWORD
-$testCommand = "psql -h $PG_HOST -p $PG_PORT -U $PG_USER -c `"SELECT version();`""
 try {
-    Invoke-Expression $testCommand | Out-Null
+    # Use -tAc to get a simple scalar result
+    & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -tAc 'SELECT 1' | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "✗ Cannot connect to PostgreSQL. Please check your connection settings." -ForegroundColor Red
         Write-Host "Host: $PG_HOST, Port: $PG_PORT, User: $PG_USER" -ForegroundColor Yellow
@@ -154,4 +156,4 @@ if ($successCount -eq $totalCount) {
 
 Write-Host ""
 Write-Host "Press any key to continue..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')

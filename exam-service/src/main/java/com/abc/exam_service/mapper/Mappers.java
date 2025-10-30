@@ -20,15 +20,22 @@ public abstract class Mappers {
     public abstract ExamResponse toResponse(Exam entity);
 
     public abstract ExamQuestion toEntity(ExamQuestionRequest req);
+    @Mapping(target = "examId", source = "exam.id")
     public abstract ExamQuestionResponse toResponse(ExamQuestion entity);
 
+    @Mapping(target = "exam", ignore = true)
     public abstract Result toEntity(ResultRequest req);
+    @Mapping(target = "examId", source = "exam.id")
     public abstract ResultResponse toResponse(Result entity);
 
+    @Mapping(target = "exam", ignore = true)
     public abstract UserAnswer toEntity(UserAnswerRequest req);
+    @Mapping(target = "examId", source = "exam.id")
     public abstract UserAnswerResponse toResponse(UserAnswer entity);
 
+    @Mapping(target = "exam", ignore = true)
     public abstract ExamRegistration toEntity(ExamRegistrationRequest req);
+    @Mapping(target = "examId", source = "exam.id")
     public abstract ExamRegistrationResponse toResponse(ExamRegistration entity);
 
 

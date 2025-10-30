@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/questions")
@@ -237,7 +238,7 @@ public class QuestionController {
     // ==================== QUESTIONS ====================
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public QuestionResponse createQuestion(@RequestBody QuestionRequest req) { return svc.createQuestion(req); }
+    public QuestionResponse createQuestion(@Valid @RequestBody QuestionRequest req) { return svc.createQuestion(req); }
 
     @GetMapping
     public Page<QuestionResponse> getAllQuestions(Pageable pageable) { 
@@ -249,7 +250,7 @@ public class QuestionController {
     
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public QuestionResponse updateQuestion(@PathVariable Long id, @RequestBody QuestionRequest req) { 
+    public QuestionResponse updateQuestion(@PathVariable Long id, @Valid @RequestBody QuestionRequest req) { 
         return svc.updateQuestion(id, req); 
     }
 
@@ -275,7 +276,7 @@ public class QuestionController {
     // Answers
     @PostMapping("/answers")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public AnswerResponse createAnswer(@RequestBody AnswerRequest req) { return svc.createAnswer(req); }
+    public AnswerResponse createAnswer(@Valid @RequestBody AnswerRequest req) { return svc.createAnswer(req); }
 
     @GetMapping("/answers")
     public Page<AnswerResponse> getAllAnswers(Pageable pageable) { return svc.getAllAnswers(pageable); }
@@ -285,7 +286,7 @@ public class QuestionController {
     
     @PutMapping("/answers/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public AnswerResponse updateAnswer(@PathVariable Long id, @RequestBody AnswerRequest req) { return svc.updateAnswer(id, req); }
+    public AnswerResponse updateAnswer(@PathVariable Long id, @Valid @RequestBody AnswerRequest req) { return svc.updateAnswer(id, req); }
 
     @DeleteMapping("/answers/{id}")
     @PreAuthorize("hasRole('ADMIN')")

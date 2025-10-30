@@ -182,6 +182,60 @@ async def validate_answer_with_ai_studio(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/evaluate-answer")
+async def evaluate_answer(
+    request: dict,
+    token: str = Depends(verify_token)
+):
+    """
+    Evaluate user's answer against the correct answer using Gemini AI
+    
+    Request body:
+    {
+        "question": "What is dependency injection?",
+        "correct_answer": "Dependency Injection is a design pattern...",
+        "user_answer": "DI is when you pass dependencies...",
+        "max_score": 10
+    }
+    
+    Returns:
+    {
+        "score": 8,
+        "max_score": 10,
+        "percentage": 80.0,
+        "is_correct": true,
+        "feedback": "Good answer, covers main concepts...",
+        "strengths": ["Clear explanation", "Mentioned key concepts"],
+        "weaknesses": ["Missing some details"],
+        "suggestions": ["Could elaborate on..."],
+        "confidence": 0.85
+    }
+    """
+    try:
+        question = request.get("question", "")
+        correct_answer = request.get("correct_answer", "")
+        user_answer = request.get("user_answer", "")
+        max_score = request.get("max_score", 10)
+        
+        if not question or not correct_answer or not user_answer:
+            raise HTTPException(
+                status_code=400, 
+                detail="Missing required fields: question, correct_answer, user_answer"
+            )
+        
+        result = await ai_studio_service.evaluate_answer(
+            question=question,
+            correct_answer=correct_answer,
+            user_answer=user_answer,
+            max_score=max_score
+        )
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error evaluating answer: {str(e)}")
+
 @app.post("/ai-studio/check-plagiarism")
 async def check_plagiarism_with_ai_studio(
     request: dict,

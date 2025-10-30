@@ -224,52 +224,74 @@ Nếu muốn dùng PostgreSQL local thay vì Docker:
 
 ## Build Services
 
-### 1. Build tất cả services
+### 1. Build tất cả services (Recommended)
 
 ```powershell
-# Script tự động (Windows)
-.\rebuild-services.ps1
+# Script tự động build tất cả services
+.\build-all-services.ps1
 ```
 
-**Hoặc build từng service:**
+**Build với options:**
 
 ```powershell
-# Build Discovery Service
-cd discovery-service; .\mvnw.cmd clean package -DskipTests; cd ..
+# Clean build (xóa target/ trước khi build)
+.\build-all-services.ps1 -Clean
 
-# Build Config Service
-cd config-service; .\mvnw.cmd clean package -DskipTests; cd ..
+# Build nhanh (skip tests)
+.\build-all-services.ps1 -SkipTests
 
-# Build Gateway Service
-cd gateway-service; .\mvnw.cmd clean package -DskipTests; cd ..
+# Build với chi tiết log
+.\build-all-services.ps1 -Verbose
 
-# Build Auth Service
-cd auth-service; .\mvnw.cmd clean package -DskipTests; cd ..
-
-# Build User Service
-cd user-service; .\mvnw.cmd clean package -DskipTests; cd ..
-
-# Build Question Service
-cd question-service; .\mvnw.cmd clean package -DskipTests; cd ..
-
-# Build Exam Service
-cd exam-service; .\mvnw.cmd clean package -DskipTests; cd ..
-
-# Build News Service
-cd news-service; .\mvnw.cmd clean package -DskipTests; cd ..
-
-# Build Career Service
-cd career-service; .\mvnw.cmd clean package -DskipTests; cd ..
+# Tổng hợp options
+.\build-all-services.ps1 -Clean -SkipTests -Verbose
 ```
 
-### 2. Kiểm tra build thành công
+### 2. Build từng service riêng lẻ
+
+```powershell
+# Build một service cụ thể
+.\build-service.ps1 auth-service
+
+# Build service với options
+.\build-service.ps1 exam-service -Clean -SkipTests
+
+# Danh sách services có thể build:
+# discovery-service, config-service, gateway-service
+# auth-service, user-service, question-service
+# exam-service, career-service, news-service
+```
+
+### 3. Build thủ công (Manual)
+
+**Nếu không dùng script, có thể build từng service:**
+
+```powershell
+# Vào thư mục service và build
+cd auth-service
+.\mvnw.cmd clean package -DskipTests
+cd ..
+
+cd exam-service  
+.\mvnw.cmd clean package -DskipTests
+cd ..
+
+# ... tương tự cho các service khác
+```
+
+### 4. Kiểm tra build thành công
 
 ```powershell
 # Kiểm tra JAR files đã được tạo
-Get-ChildItem -Path . -Recurse -Filter "*.jar" | Where-Object { $_.Directory.Name -eq "target" } | Select-Object FullName
+Get-ChildItem -Path . -Recurse -Filter "*.jar" | Where-Object { $_.Directory.Name -eq "target" } | Select-Object Name, Directory
+
+# Hoặc dùng script check
+.\build-all-services.ps1 | Select-String "SUCCESS|FAILED"
 ```
 
-✅ Mỗi service sẽ có file `.jar` trong thư mục `target/`
+✅ **Kết quả:** Mỗi service sẽ có file `.jar` trong thư mục `target/`  
+🚀 **Thời gian:** 2-5 phút tùy máy và số services  
+📊 **Hiển thị:** Bảng tóm tắt kết quả build từng service
 
 ---
 
