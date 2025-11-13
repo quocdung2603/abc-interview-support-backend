@@ -3,16 +3,22 @@
 # Interview Microservice ABC - Sample Data Import
 # =============================================
 
+param(
+    [switch]$NoWait = $false,
+    [switch]$UseDocker = $true
+)
+
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "Interview Microservice ABC - Database Import" -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Configuration
+$CONTAINER_NAME = "interview-postgres"
 $PG_HOST = "localhost"
 $PG_PORT = "5432"
 $PG_USER = "postgres"
-$PG_PASSWORD = "password"  # Change this to your PostgreSQL password
+$PG_PASSWORD = "password"
 
 # Database list in import order
 $DATABASES = @(
@@ -24,7 +30,37 @@ $DATABASES = @(
     @{Name="newsdb"; File="newsdb-sample-data.sql"; Description="News Service"}
 )
 
-# Function to execute SQL file
+# Function to execute SQL using Docker
+function Import-SqlFileDocker {
+    param(
+        [string]$Database,
+        [string]$SqlFile,
+        [string]$Description
+    )
+
+    Write-Host "Importing $Description..." -ForegroundColor Yellow
+
+    try {
+        # Use Get-Content and pipe to docker exec
+        $output = Get-Content $SqlFile -Raw | docker exec -i $CONTAINER_NAME psql -U $PG_USER -d $Database 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  Success: $Description imported!" -ForegroundColor Green
+            return $true
+        } else {
+            Write-Host "  Failed: $Description (exit code $LASTEXITCODE)" -ForegroundColor Red
+            if ($output -and $output.Length -lt 500) {
+                Write-Host "  Output: $output" -ForegroundColor Gray
+            }
+            return $false
+        }
+    } catch {
+        Write-Host "  Error: $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    }
+}
+
+# Function to execute SQL file (direct psql)
 function Import-SqlFile {
     param(
         [string]$Database,
@@ -35,36 +71,54 @@ function Import-SqlFile {
     Write-Host "Importing $Description..." -ForegroundColor Yellow
 
     $env:PGPASSWORD = $PG_PASSWORD
-    # Build psql argument list to avoid quoting issues
-    $args = @('-h', $PG_HOST, '-p', $PG_PORT, '-U', $PG_USER, '-d', $Database, '-f', $SqlFile)
-
+    
     try {
-        & psql @args
+        $output = & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $Database -f $SqlFile -q 2>&1
+        
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ $Description imported successfully!" -ForegroundColor Green
+            Write-Host "  Success: $Description imported!" -ForegroundColor Green
+            return $true
         } else {
-            Write-Host "✗ Failed to import $Description (exit code $LASTEXITCODE)" -ForegroundColor Red
+            Write-Host "  Failed: $Description (exit code $LASTEXITCODE)" -ForegroundColor Red
             return $false
         }
     } catch {
-        Write-Host "✗ Error importing $Description : $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "  Error: $($_.Exception.Message)" -ForegroundColor Red
         return $false
     }
-
-    return $true
 }
 
-# Function to check if database exists
+# Function to check if database exists using Docker
+function Test-DatabaseExistsDocker {
+    param([string]$Database)
+    
+    try {
+        $query = "SELECT 1 FROM pg_database WHERE datname='$Database'"
+        $result = docker exec $CONTAINER_NAME psql -U $PG_USER -d postgres -tAc $query 2>&1
+        
+        if ($LASTEXITCODE -eq 0 -and $result -match '1') {
+            return $true
+        }
+        return $false
+    } catch {
+        return $false
+    }
+}
+
+# Function to check if database exists (direct psql)
 function Test-DatabaseExists {
     param([string]$Database)
 
     $env:PGPASSWORD = $PG_PASSWORD
-    # Query pg_database in a portable way (no grep/cut required)
-    $query = "SELECT 1 FROM pg_database WHERE datname='$Database'"
+    
     try {
-        $result = & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -tAc $query 2>$null
-        if ($LASTEXITCODE -ne 0) { return $false }
-        return ($result.Trim() -eq '1')
+        $query = "SELECT 1 FROM pg_database WHERE datname='$Database'"
+        $result = & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d postgres -tAc $query 2>&1
+        
+        if ($LASTEXITCODE -eq 0 -and $result -match '1') {
+            return $true
+        }
+        return $false
     } catch {
         return $false
     }
@@ -73,41 +127,111 @@ function Test-DatabaseExists {
 # Main execution
 Write-Host "Checking prerequisites..." -ForegroundColor Yellow
 
-# Check if PostgreSQL is accessible
-$env:PGPASSWORD = $PG_PASSWORD
+# Determine which method to use
+if ($UseDocker) {
+    # Check if Docker is available
+    try {
+        $null = Get-Command docker -ErrorAction Stop
+        $containerCheck = docker ps --filter "name=$CONTAINER_NAME" --format "{{.Names}}" 2>&1
+        
+        if ($containerCheck -eq $CONTAINER_NAME) {
+            Write-Host "  Using Docker container: $CONTAINER_NAME" -ForegroundColor Cyan
+            $USE_DOCKER_MODE = $true
+        } else {
+            Write-Host "  Warning: Container '$CONTAINER_NAME' not found or not running" -ForegroundColor Yellow
+            Write-Host "  Trying direct psql connection..." -ForegroundColor Yellow
+            $USE_DOCKER_MODE = $false
+        }
+    } catch {
+        Write-Host "  Docker not available, trying direct psql..." -ForegroundColor Yellow
+        $USE_DOCKER_MODE = $false
+    }
+} else {
+    $USE_DOCKER_MODE = $false
+}
+
+# If not using Docker, check psql
+if (-not $USE_DOCKER_MODE) {
+    try {
+        $null = Get-Command psql -ErrorAction Stop
+        Write-Host "  Using direct psql connection" -ForegroundColor Cyan
+    } catch {
+        Write-Host "  Error: Neither Docker nor psql is available!" -ForegroundColor Red
+        Write-Host "  Please either:" -ForegroundColor Yellow
+        Write-Host "    1. Start Docker with: docker-compose up -d" -ForegroundColor Yellow
+        Write-Host "    2. Install PostgreSQL client tools (psql)" -ForegroundColor Yellow
+        if (-not $NoWait) {
+            Write-Host "`nPress any key to exit..." -ForegroundColor Gray
+            $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+        }
+        exit 1
+    }
+}
+
+# Test connection
 try {
-    # Use -tAc to get a simple scalar result
-    & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -tAc 'SELECT 1' | Out-Null
+    if ($USE_DOCKER_MODE) {
+        $testResult = docker exec $CONTAINER_NAME psql -U $PG_USER -d postgres -tAc 'SELECT 1' 2>&1
+    } else {
+        $env:PGPASSWORD = $PG_PASSWORD
+        $testResult = & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d postgres -tAc 'SELECT 1' 2>&1
+    }
+    
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "✗ Cannot connect to PostgreSQL. Please check your connection settings." -ForegroundColor Red
-        Write-Host "Host: $PG_HOST, Port: $PG_PORT, User: $PG_USER" -ForegroundColor Yellow
+        Write-Host "  Error: Cannot connect to PostgreSQL!" -ForegroundColor Red
+        Write-Host "  Make sure PostgreSQL is running (docker-compose up -d)" -ForegroundColor Yellow
+        if (-not $NoWait) {
+            Write-Host "`nPress any key to exit..." -ForegroundColor Gray
+            $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+        }
         exit 1
     }
 } catch {
-    Write-Host "✗ PostgreSQL is not accessible. Please ensure PostgreSQL is running." -ForegroundColor Red
+    Write-Host "  Error: PostgreSQL is not accessible!" -ForegroundColor Red
+    Write-Host "  Exception: $($_.Exception.Message)" -ForegroundColor Gray
+    if (-not $NoWait) {
+        Write-Host "`nPress any key to exit..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    }
     exit 1
 }
 
-Write-Host "✓ PostgreSQL connection successful!" -ForegroundColor Green
+Write-Host "  Success: PostgreSQL connection OK!" -ForegroundColor Green
 Write-Host ""
 
 # Check if all databases exist
-Write-Host "Checking if all databases exist..." -ForegroundColor Yellow
+Write-Host "Checking databases..." -ForegroundColor Yellow
 $missingDatabases = @()
 
 foreach ($db in $DATABASES) {
-    if (-not (Test-DatabaseExists -Database $db.Name)) {
+    Write-Host "  Checking $($db.Name)..." -NoNewline
+    
+    $dbExists = if ($USE_DOCKER_MODE) {
+        Test-DatabaseExistsDocker -Database $db.Name
+    } else {
+        Test-DatabaseExists -Database $db.Name
+    }
+    
+    if ($dbExists) {
+        Write-Host " Found" -ForegroundColor Green
+    } else {
+        Write-Host " Missing" -ForegroundColor Red
         $missingDatabases += $db.Name
     }
 }
 
 if ($missingDatabases.Count -gt 0) {
-    Write-Host "✗ Missing databases: $($missingDatabases -join ', ')" -ForegroundColor Red
-    Write-Host "Please run init.sql first to create all databases." -ForegroundColor Yellow
+    Write-Host "`n  Error: Missing databases: $($missingDatabases -join ', ')" -ForegroundColor Red
+    Write-Host "  Please ensure all services are running (docker-compose up -d)" -ForegroundColor Yellow
+    Write-Host "  Services create their databases automatically on first start." -ForegroundColor Yellow
+    if (-not $NoWait) {
+        Write-Host "`nPress any key to exit..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    }
     exit 1
 }
 
-Write-Host "✓ All databases exist!" -ForegroundColor Green
+Write-Host "  Success: All databases exist!" -ForegroundColor Green
 Write-Host ""
 
 # Import data
@@ -121,39 +245,46 @@ foreach ($db in $DATABASES) {
     $sqlFile = Join-Path $PSScriptRoot $db.File
     
     if (-not (Test-Path $sqlFile)) {
-        Write-Host "✗ SQL file not found: $sqlFile" -ForegroundColor Red
+        Write-Host "  Error: SQL file not found: $($db.File)" -ForegroundColor Red
         continue
     }
     
-    if (Import-SqlFile -Database $db.Name -SqlFile $sqlFile -Description $db.Description) {
-        $successCount++
+    $importSuccess = if ($USE_DOCKER_MODE) {
+        Import-SqlFileDocker -Database $db.Name -SqlFile $sqlFile -Description $db.Description
+    } else {
+        Import-SqlFile -Database $db.Name -SqlFile $sqlFile -Description $db.Description
     }
     
-    Write-Host ""
+    if ($importSuccess) {
+        $successCount++
+    }
 }
 
 # Summary
+Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "Import Summary" -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host "Successfully imported: $successCount/$totalCount databases" -ForegroundColor $(if ($successCount -eq $totalCount) { "Green" } else { "Yellow" })
 
 if ($successCount -eq $totalCount) {
+    Write-Host "Status: SUCCESS - All $totalCount databases imported!" -ForegroundColor Green
     Write-Host ""
-    Write-Host "🎉 All sample data imported successfully!" -ForegroundColor Green
+    Write-Host "Test Credentials (Password: admin123 for all):" -ForegroundColor Cyan
+    Write-Host "  Admin:     admin@example.com" -ForegroundColor White
+    Write-Host "  Recruiter: recruiter@example.com" -ForegroundColor White  
+    Write-Host "  User:      user@example.com" -ForegroundColor White
     Write-Host ""
-    Write-Host "Test Users:" -ForegroundColor Cyan
-    Write-Host "  Admin: admin@example.com / password123" -ForegroundColor White
-    Write-Host "  Recruiter: recruiter@example.com / password123" -ForegroundColor White
-    Write-Host "  User: user@example.com / password123" -ForegroundColor White
-    Write-Host "  Test: test@example.com / password123" -ForegroundColor White
-    Write-Host ""
-    Write-Host "You can now start the microservices and test the APIs!" -ForegroundColor Green
+    Write-Host "Gateway URL: http://localhost:8080" -ForegroundColor Green
+    Write-Host "You can now test the APIs!" -ForegroundColor Green
 } else {
-    Write-Host ""
-    Write-Host "⚠️  Some imports failed. Please check the error messages above." -ForegroundColor Yellow
+    Write-Host "Status: PARTIAL - $successCount/$totalCount databases imported" -ForegroundColor Yellow
+    Write-Host "Please check the error messages above." -ForegroundColor Yellow
 }
 
 Write-Host ""
-Write-Host "Press any key to continue..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+
+if (-not $NoWait) {
+    Write-Host "Press any key to continue..." -ForegroundColor Gray
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+}
+

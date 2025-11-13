@@ -136,255 +136,154 @@ GET  /auth/verify        Verify token
 
 ### 👤 User Service
 
-```
-GET  /users                Get all (ADMIN, paginated)
-GET  /users/{id}           Get by ID
-PUT  /users/{id}           Update
-PUT  /users/{id}/role      Update role (ADMIN)
-PUT  /users/{id}/status    Update status (ADMIN)
-POST /users/elo            Apply ELO change
-```
+# Interview Microservices — ABC (Git-friendly README)
 
-### ❓ Question Service
-
-```
-GET  /fields               Get all fields ✨
-GET  /topics               Get all topics ✨
-GET  /levels               Get all levels ✨
-GET  /question-types       Get all types ✨
-GET  /questions            Get all questions ✨
-POST /questions            Create question
-POST /questions/{id}/approve  Approve (ADMIN)
-```
-
-### 📝 Exam Service
-
-```
-GET  /exams                Get all exams ✨
-POST /exams                Create exam
-GET  /exams/{id}           Get by ID
-GET  /exams/type/{type}    By type (paginated)
-POST /exams/{id}/publish   Publish (ADMIN/RECRUITER)
-POST /exams/registrations  Register for exam
-GET  /exams/results/user/{userId}  User results
-```
-
-### 📰 News Service
-
-```
-GET  /news                 Get all news ✨
-POST /news                 Create news
-GET  /news/type/{type}     By type (paginated)
-POST /news/{id}/approve    Approve (ADMIN)
-POST /recruitments         Create recruitment
-GET  /recruitments         Get all recruitments
-```
-
-**✨ = Endpoints mới được thêm**
-
-Chi tiết đầy đủ: [API-SPECIFICATION.md](API-SPECIFICATION.md)
+Ngắn gọn, dễ dùng README để bắt đầu với repository này. Bao gồm: mục đích, cách build & chạy, cách publish Docker images và những lệnh hữu ích cho developer.
 
 ---
 
-## 🔐 AUTHENTICATION
+## Tổng quan
 
-### Flow
+Hệ thống là một bộ microservices Spring Boot (Java 17) + PostgreSQL với 1 NLP service (Python/FastAPI). Mục tiêu: hệ thống phỏng vấn trực tuyến có quản lý users, question bank, exam flow, NLP grading và tính năng ELO.
 
-```
-Client                      Auth Service              User Service
-  │                              │                         │
-  ├─POST /auth/register────────>│                         │
-  │                              ├─Hash password          │
-  │                              ├─POST /internal/create─>│
-  │                              │                    Save to DB
-  │                              │<────────user────────────┤
-  │                              ├─Generate JWT            │
-  │<────{token, user}────────────┤                         │
-  │                              │                         │
-  ├─POST /auth/login──────────>│                         │
-  │                              ├─Verify password         │
-  │                              ├─Generate JWT            │
-  │<────{token, user}────────────┤                         │
-  │                              │                         │
-  ├─GET /users/3────────────────────────────────────────>│
-  │  (Authorization: Bearer token)                   Query DB
-  │<─────────────────────────user────────────────────────┤
-```
-
-### Test Accounts
-
-**Password cho tất cả:** `password123`
-
-| Email | Role | ELO | Rank |
-|-------|------|-----|------|
-| admin@example.com | ADMIN | 0 | NEWBIE |
-| recruiter@example.com | RECRUITER | 0 | NEWBIE |
-| user@example.com | USER | 1200 | BRONZE |
-| developer@example.com | USER | 1500 | SILVER |
-| expert@example.com | USER | 2100 | GOLD |
+Các service chính (thư mục cùng tên):
+- `gateway-service`, `discovery-service`, `config-service`
+- `auth-service`, `user-service`, `question-service`, `exam-service`, `career-service`, `news-service`
+- `nlp-service` (Python FastAPI)
 
 ---
 
-## 🧪 TESTING
+## Quick start (local, Docker Compose)
 
-### 1. Import Postman Collection
+Prerequisites:
+- Docker Desktop (or Docker engine) running
+- Docker Compose
+- (Optional) Java 17 and Maven if you want to build JARs locally
 
-**Khuyến nghị: Import từ Swagger**
-
-```
-http://localhost:8081/v3/api-docs  (Auth)
-http://localhost:8082/v3/api-docs  (User)
-http://localhost:8085/v3/api-docs  (Question)
-http://localhost:8086/v3/api-docs  (Exam)
-http://localhost:8087/v3/api-docs  (News)
-```
-
-Xem chi tiết: [POSTMAN-IMPORT-INSTRUCTIONS.md](POSTMAN-IMPORT-INSTRUCTIONS.md)
-
-### 2. Test Scripts
+1) Start all services (containers):
 
 ```powershell
-# Test authentication flow
-.\test-auth-flow.ps1
-
-# Test new endpoints
-.\test-new-endpoints.ps1
-
-# Verify database
-.\check-database-data.ps1
-```
-
-### 3. Test với cURL
-
-```bash
-# Login
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password123"}'
-
-# Get profile (replace TOKEN)
-curl http://localhost:8080/users/3 \
-  -H "Authorization: Bearer TOKEN"
-```
-
----
-
-## 🗄️ DATABASE
-
-### 6 Databases với 160+ sample records
-
-**authdb:** 3 roles  
-**userdb:** 8 users, 20+ ELO history (passwords BCrypt encrypted)  
-**questiondb:** 6 fields, 25+ topics, 15+ approved questions  
-**examdb:** 8+ exams, 10+ results, 15+ registrations  
-**newsdb:** 8 news, 10 recruitment posts  
-**careerdb:** 20+ career preferences
-
-Hướng dẫn: [HUONG-DAN-IMPORT-DU-LIEU.md](HUONG-DAN-IMPORT-DU-LIEU.md)
-
----
-
-## 🛠️ DEVELOPMENT
-
-### Rebuild Services
-
-```powershell
-.\rebuild-services.ps1
-```
-
-### View Logs
-
-```powershell
-docker-compose logs -f user-service
-docker-compose logs -f auth-service
-```
-
-### Restart Service
-
-```powershell
-docker-compose restart user-service
-```
-
-### Reset Database
-
-```powershell
-docker-compose down -v
 docker-compose up -d
-.\run-init-with-data.ps1
+```
+
+2) Import sample data (PowerShell helper):
+
+```powershell
+.\database-import\quick-import-data.ps1
+```
+
+3) Check services are up (example):
+
+```powershell
+docker-compose ps
+curl http://localhost:8761  # Eureka UI
 ```
 
 ---
 
-## 🌐 SERVICE URLS
+## Build (per-service) and helper scripts
 
-| Service | URL | Swagger |
-|---------|-----|---------|
-| API Gateway | http://localhost:8080 | - |
-| Auth Service | http://localhost:8081 | [Swagger](http://localhost:8081/swagger-ui.html) |
-| User Service | http://localhost:8082 | [Swagger](http://localhost:8082/swagger-ui.html) |
-| Question Service | http://localhost:8085 | [Swagger](http://localhost:8085/swagger-ui.html) |
-| Exam Service | http://localhost:8086 | [Swagger](http://localhost:8086/swagger-ui.html) |
-| News Service | http://localhost:8087 | [Swagger](http://localhost:8087/swagger-ui.html) |
-| Eureka Dashboard | http://localhost:8761 | - |
+To build all Java services (use Maven wrappers included):
+
+```powershell
+.\build-all-services.ps1 -SkipTests
+```
+
+Build a single service (example):
+
+```powershell
+.\build-service.ps1 -Service exam-service -SkipTests
+```
+
+Scripts provided in repo:
+- `build-all-services.ps1` — builds every service via its `mvnw`
+- `build-service.ps1` — build a single service
+- `rebuild-services.ps1` — convenience wrapper used by CI/local runs
+- `test-exam-flow.ps1` — end-to-end script exercising exam creation/submission
 
 ---
 
-## 📚 DOCUMENTATION
+## Docker images and publishing
 
-### Core Files
+If you want to publish images to Docker Hub, use the helper `push-images.ps1`.
 
-1. **README.md** (this file) - Main documentation
-2. **ARCHITECTURE-CLARIFICATION.md** - Auth/User separation explained
-3. **POSTMAN-IMPORT-INSTRUCTIONS.md** - API testing guide
-4. **HUONG-DAN-IMPORT-DU-LIEU.md** - Database setup guide
-5. **API-SPECIFICATION.md** - Complete API specifications
+Example (build artifacts then push images):
 
-### Scripts
+```powershell
+# Make sure you are logged in
+docker login
 
-- `run-init-with-data.ps1` - Import 160+ sample records
-- `test-auth-flow.ps1` - Test authentication flow
-- `test-new-endpoints.ps1` - Test GET ALL endpoints
-- `rebuild-services.ps1` - Rebuild modified services
-- `check-database-data.ps1` - Verify database content
-- `quick-test.ps1` - Quick health check
+# Build JARs then build & push images
+.\push-images.ps1 -HubUser <yourHubUser> -Tag v1.0 -Build -SkipTests
+```
+
+Images are pushed as `<hubUser>/<service>:<tag>`. Consumers can pull individual images or update `docker-compose.yml` to reference the published images.
+
+Notes:
+- Ensure `target/*.jar` exist before image build (the `-Build` flag runs the build script).
+- For private images, grant access on Docker Hub or use a private registry.
 
 ---
 
-## 🐛 TROUBLESHOOTING
+## Developer workflow & common tasks
 
-### Services không start
-
-```powershell
-docker-compose logs service-name
-docker-compose restart service-name
-```
-
-### Không có dữ liệu
+- Run one service locally (for debugging):
 
 ```powershell
-.\run-init-with-data.ps1  # Option 1 → yes
-```
-
-### Authentication fails
-
-```powershell
-# Test với existing user
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password123"}'
-```
-
-### Port conflicts
-
 ```powershell
 # Check ports
 netstat -ano | findstr "8080 8081 8082"
+```
+
+- Run tests for a service:
+
+```powershell
 
 # Stop all
+```
+
+- Rebuild and restart a single container after code changes:
+
+```powershell
 docker-compose down
 ```
 
 ---
+```
+
+---
+
+## Troubleshooting
+
+- Docker build shows buildkit progress lines (like `#0 building with "desktop-linux"`) — these are normal. The script captures exit codes; if you see build failures, inspect the full output with:
+
+```powershell
+docker build ./discovery-service -t temp/discovery:local
+```
+
+- If `push-images.ps1` fails to push, check `docker login` and network connectivity.
+- If a service fails on startup, check the log of the container:
+
+```powershell
+docker-compose logs -f exam-service
+```
+
+---
+
+## Contributing & notes for maintainers
+
+- Config files: `config-repo/` contains YAML used by the Spring Cloud Config server in containerized environments.
+- Service ports and routes are configured in `gateway-service` and `config-repo/api-gateway.yml`.
+- When changing auth keys/secrets, update both `auth-service` and `gateway-service` config.
+
+If you'd like, I can also:
+- Add a short `CONTRIBUTING.md` with PR checklist and commit message format.
+- Create a minimal quick-start GitHub Actions workflow to build & publish images on tags.
+
+---
+
+If you want this README translated to English or expanded with diagrams and commands for CI, tell me which format (English/Markdown + badges + diagrams) and I'll update it.
+
 
 ## ✅ SYSTEM STATUS
 

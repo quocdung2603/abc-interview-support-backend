@@ -1,0 +1,48 @@
+$services = @(
+    "auth-service",
+    "user-service",
+    "career-service",
+    "config-service",
+    "discovery-service",
+    "gateway-service"
+)
+foreach ($s in $services) {
+    Push-Location $s
+    Write-Host "==> Building $s" -ForegroundColor Cyan
+    mvn -q clean package -DskipTests
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Build FAILED in $s"
+        Pop-Location
+        break
+    }
+    Pop-Location
+}
+
+#DB
+
+ docker exec -it postgres psql -U postgres -d postgres    
+
+
+INSERT INTO roles(role_name, description)
+VALUES ('STUDENT', 'Role cho sinh viên'),
+       ('RECRUITER', 'Role cho nhà tuyển dụng'),
+       ('ADMIN', 'Role cho quản trị viên')
+
+
+\l : liệt kê database
+
+\c authdb : connect tới DB authdb
+
+\dt : liệt kê bảng trong DB hiện tại
+
+\d roles : xem cấu trúc bảng roles
+
+SELECT * FROM roles; : xem dữ liệu đã insert
+
+# pagekage
+ mvn -DskipTests clean package   
+
+
+
+#Docker
+docker compose up -d --build 

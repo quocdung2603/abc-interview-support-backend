@@ -295,6 +295,56 @@ Get-ChildItem -Path . -Recurse -Filter "*.jar" | Where-Object { $_.Directory.Nam
 
 ---
 
+## Publish images to Docker Hub
+
+Bạn có thể push các image Docker của từng service lên Docker Hub để người khác pull và chạy.
+
+### Prerequisites
+- Docker installed and running
+- Logged into Docker Hub: `docker login`
+
+### Script (recommended)
+1. Build artifacts (JARs)
+
+```powershell
+.\build-all-services.ps1 -SkipTests
+```
+
+2. Build & push images
+
+```powershell
+# Build and push all service images to Docker Hub under <hubUser> with tag <tag>
+.\push-images.ps1 -HubUser <hubUser> -Tag <tag> -Build -SkipTests
+
+# Example
+.\push-images.ps1 -HubUser quocdung2603 -Tag v1.0 -Build -SkipTests
+```
+
+This will build Docker images from each service directory and push them to `docker.io/<hubUser>/<service>:<tag>`.
+
+### How others pull and run
+Others can pull images individually:
+
+```powershell
+docker pull <hubUser>/auth-service:<tag>
+docker pull <hubUser>/exam-service:<tag>
+# etc
+```
+
+Or update `docker-compose.yml` service image names to point to the published images, then run:
+
+```powershell
+docker-compose pull
+docker-compose up -d
+```
+
+### Notes
+- The script relies on each service's `Dockerfile` to form the image. Ensure `target/*.jar` exists (build step). 
+- If pushing public images, anyone can pull. For private images, add collaborators or org members on Docker Hub.
+
+
+---
+
 ## Chạy Services
 
 ### Option 1: Docker Compose (Recommended - All in One)
