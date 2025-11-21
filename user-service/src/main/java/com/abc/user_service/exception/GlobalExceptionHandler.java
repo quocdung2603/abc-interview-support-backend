@@ -167,6 +167,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex,
             HttpServletRequest request) {
+        // Log the full exception for debugging
+        ex.printStackTrace();
+        System.err.println("=== CAUGHT EXCEPTION IN GLOBAL HANDLER ===");
+        System.err.println("Type: " + ex.getClass().getName());
+        System.err.println("Message: " + ex.getMessage());
+        System.err.println("Cause: " + (ex.getCause() != null ? ex.getCause().getMessage() : "null"));
+        
         ErrorResponse error = ErrorResponse.builder()
                 .type("https://errors.abc.com/INTERNAL_SERVER_ERROR")
                 .title("Internal Server Error")

@@ -238,6 +238,19 @@ Write-Host ""
 Write-Host "Starting data import..." -ForegroundColor Yellow
 Write-Host ""
 
+# Clear existing user data to avoid conflicts with hashed passwords
+Write-Host "Clearing existing user data..." -ForegroundColor Yellow
+if ($USE_DOCKER_MODE) {
+    docker exec $CONTAINER_NAME psql -U $PG_USER -d userdb -c "TRUNCATE TABLE elo_history, users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
+    docker exec $CONTAINER_NAME psql -U $PG_USER -d authdb -c "TRUNCATE TABLE users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
+} else {
+    $env:PGPASSWORD = $PG_PASSWORD
+    & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d userdb -c "TRUNCATE TABLE elo_history, users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
+    & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d authdb -c "TRUNCATE TABLE users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
+}
+Write-Host "  User data cleared!" -ForegroundColor Green
+Write-Host ""
+
 $successCount = 0
 $totalCount = $DATABASES.Count
 

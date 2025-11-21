@@ -1,5 +1,9 @@
 server:
   port: ${QUESTION_SERVICE_PORT:8085}
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
 
 spring:
   application:
@@ -16,6 +20,11 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
 jwt:
   secret: ${JWT_SECRET:UCIafMmHwgsJKIgg4xVAL/eOvR3ZXD/ZnYE9AfMaMQg=}

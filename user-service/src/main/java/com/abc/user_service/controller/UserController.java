@@ -1,6 +1,7 @@
 package com.abc.user_service.controller;
 
 import com.abc.user_service.dto.request.*;
+import com.abc.user_service.dto.response.EloHistoryResponse;
 import com.abc.user_service.dto.response.UserResponse;
 import com.abc.user_service.entity.UserStatus;
 import com.abc.user_service.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -108,5 +110,25 @@ public class UserController {
     @GetMapping("/roles")
     public java.util.List<com.abc.user_service.dto.response.RoleResponse> getAllRoles() {
         return userService.getAllRoles();
+    }
+
+    // Elo History endpoints
+    @GetMapping("/{userId}/elo-history")
+    public Page<EloHistoryResponse> getEloHistory(
+            @PathVariable Long userId,
+            Pageable pageable) {
+        return userService.getEloHistory(userId, pageable);
+    }
+
+    @GetMapping("/{userId}/elo-history/recent")
+    public List<EloHistoryResponse> getRecentEloHistory(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return userService.getRecentEloHistory(userId, limit);
+    }
+
+    @GetMapping("/{userId}/elo-history/all")
+    public List<EloHistoryResponse> getAllEloHistory(@PathVariable Long userId) {
+        return userService.getAllEloHistory(userId);
     }
 }

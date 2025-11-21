@@ -5,20 +5,28 @@ import com.abc.exam_service.entity.*;
 import com.abc.exam_service.mapper.Mappers;
 import com.abc.exam_service.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExamService {
     private final ExamRepository examRepository;
     private final ExamQuestionRepository examQuestionRepository;
     private final ResultRepository resultRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final ExamRegistrationRepository examRegistrationRepository;
+    private final QuestionServiceClient questionServiceClient;
     private final Mappers mappers;
 
     public ExamResponse createExam(ExamRequest req) {
@@ -59,8 +67,18 @@ public class ExamService {
         return examRepository.findByExamType(examType, pageable).map(mappers::toResponse);
     }
 
+    @Transactional
     public ExamQuestionResponse addQuestionToExam(ExamQuestionRequest req) {
-        return mappers.toResponse(examQuestionRepository.save(mappers.toEntity(req)));
+        ExamQuestion examQuestion = mappers.toEntity(req);
+        // Set exam entity for proper foreign key relationship
+        Exam exam = examRepository.findById(req.getExamId()).orElseThrow();
+        examQuestion.setExam(exam);
+        ExamQuestion saved = examQuestionRepository.save(examQuestion);
+        // Force load exam to avoid LazyInitializationException when mapping
+        if (saved.getExam() != null) {
+            saved.getExam().getId();
+        }
+        return mappers.toResponse(saved);
     }
 
     public void removeQuestionsFromExam(Long examId) {
@@ -123,7 +141,30 @@ public class ExamService {
 
     // Additional CRUD methods
     public ExamResponse getExamById(Long id) {
-        return mappers.toResponse(examRepository.findById(id).orElseThrow());
+        Exam exam = examRepository.findById(id).orElseThrow();
+        ExamResponse response = mappers.toResponse(exam);
+        
+        // Lấy danh sách câu hỏi theo thứ tự
+        List<ExamQuestion> examQuestions = examQuestionRepository.findByExamIdOrderByOrderNumberAsc(id);
+        if (!examQuestions.isEmpty()) {
+            List<Long> questionIds = examQuestions.stream()
+                    .map(ExamQuestion::getQuestionId)
+                    .toList();
+            
+            // Fetch full question details từ question-service
+            List<QuestionDTO> questions = new ArrayList<>();
+            for (Long questionId : questionIds) {
+                try {
+                    QuestionDTO question = questionServiceClient.getQuestionById(questionId);
+                    questions.add(question);
+                } catch (Exception e) {
+                    log.warn("Could not fetch question {}: {}", questionId, e.getMessage());
+                }
+            }
+            response.setQuestions(questions);
+        }
+        
+        return response;
     }
 
     public ExamResponse updateExam(Long id, ExamRequest req) {
@@ -152,5 +193,152 @@ public class ExamService {
 
     public ExamRegistrationResponse getRegistrationById(Long id) {
         return mappers.toResponse(examRegistrationRepository.findById(id).orElseThrow());
+    }
+
+    @Transactional
+    public RandomQuestionsResponse addRandomQuestionsToExam(RandomQuestionsRequest req) {
+        try {
+            // Verify exam exists
+            Exam exam = examRepository.findById(req.getExamId())
+                    .orElseThrow(() -> new RuntimeException("Exam not found with id: " + req.getExamId()));
+            
+            log.info("Fetching random questions for exam {} with criteria: field={}, topics={}, level={}, type={}, count={}", 
+                    req.getExamId(), req.getField(), req.getTopics(), req.getLevel(), req.getQuestionType(), req.getNumberOfQuestions());
+            
+            // Fetch questions from question-service
+            List<QuestionDTO> questions = questionServiceClient.searchQuestions(
+                    req.getField(),
+                    req.getTopics(),
+                    req.getLevel(),
+                    req.getQuestionType(),
+                    req.getNumberOfQuestions() * 2 // Fetch more to have options
+            );
+            
+            if (questions == null || questions.isEmpty()) {
+                throw new RuntimeException("No questions found matching the criteria");
+            }
+            
+            // Shuffle and limit to requested number - create mutable list first!
+            List<QuestionDTO> mutableQuestions = new ArrayList<>(questions);
+            Collections.shuffle(mutableQuestions);
+            List<QuestionDTO> selectedQuestions = mutableQuestions.stream()
+                    .limit(req.getNumberOfQuestions())
+                    .collect(Collectors.toList());
+            
+            log.info("Selected {} random questions from {} available", selectedQuestions.size(), questions.size());
+            
+            // Get current max order number for this exam
+            Integer maxOrder = examQuestionRepository.findMaxOrderNumberByExamId(req.getExamId());
+            int startOrder = (maxOrder != null ? maxOrder : 0) + 1;
+            
+            log.info("Starting order number: {}", startOrder);
+            
+            // Add questions to exam
+            List<Long> addedQuestionIds = new ArrayList<>();
+            for (int i = 0; i < selectedQuestions.size(); i++) {
+                QuestionDTO question = selectedQuestions.get(i);
+                
+                ExamQuestion examQuestion = new ExamQuestion();
+                examQuestion.setExam(exam);
+                examQuestion.setQuestionId(question.getId());
+                examQuestion.setOrderNumber(startOrder + i);
+                
+                log.info("Saving exam question: examId={}, questionId={}, orderNumber={}", 
+                        exam.getId(), question.getId(), examQuestion.getOrderNumber());
+                
+                ExamQuestion saved = examQuestionRepository.save(examQuestion);
+                log.info("Saved exam question with id: {}", saved.getId());
+                addedQuestionIds.add(question.getId());
+            }
+            
+            log.info("Successfully added {} questions to exam {}", addedQuestionIds.size(), req.getExamId());
+            
+            RandomQuestionsResponse response = new RandomQuestionsResponse();
+            response.setExamId(req.getExamId());
+            response.setAddedCount(addedQuestionIds.size());
+            response.setQuestionIds(addedQuestionIds);
+            
+            return response;
+        } catch (Exception e) {
+            log.error("Error adding random questions to exam", e);
+            throw new RuntimeException("Failed to add random questions: " + e.getMessage(), e);
+        }
+    }
+    
+    @Transactional
+    public CreateExamWithQuestionsResponse createExamWithRandomQuestions(CreateExamWithQuestionsRequest req, Long userId) {
+        try {
+            log.info("Creating exam with random questions for user {}: title={}, field={}, topics={}, level={}, type={}, count={}", 
+                    userId, req.getTitle(), req.getField(), req.getTopics(), req.getLevel(), req.getQuestionType(), req.getNumberOfQuestions());
+            
+            // 1. Fetch random questions first
+            List<QuestionDTO> questions = questionServiceClient.searchQuestions(
+                    req.getField(),
+                    req.getTopics(),
+                    req.getLevel(),
+                    req.getQuestionType(),
+                    req.getNumberOfQuestions() * 2 // Fetch more to have options
+            );
+            
+            if (questions == null || questions.isEmpty()) {
+                throw new RuntimeException("No questions found matching the criteria");
+            }
+            
+            // Shuffle and limit
+            List<QuestionDTO> mutableQuestions = new ArrayList<>(questions);
+            Collections.shuffle(mutableQuestions);
+            List<QuestionDTO> selectedQuestions = mutableQuestions.stream()
+                    .limit(req.getNumberOfQuestions())
+                    .collect(Collectors.toList());
+            
+            log.info("Selected {} random questions from {} available", selectedQuestions.size(), questions.size());
+            
+            // 2. Create exam with DRAFT status
+            Exam exam = new Exam();
+            exam.setUserId(userId);
+            exam.setTitle(req.getTitle());
+            exam.setPosition(req.getPosition());
+            exam.setDuration(req.getDuration());
+            exam.setLanguage(req.getLanguage());
+            exam.setQuestionCount(selectedQuestions.size());
+            exam.setExamType("PRACTICE"); // User self-practice
+            exam.setStatus("DRAFT"); // Not published
+            exam.setCreatedAt(LocalDateTime.now());
+            exam.setCreatedBy(userId);
+            
+            Exam savedExam = examRepository.save(exam);
+            log.info("Created exam with id: {}", savedExam.getId());
+            
+            // 3. Add questions to exam
+            List<Long> addedQuestionIds = new ArrayList<>();
+            for (int i = 0; i < selectedQuestions.size(); i++) {
+                QuestionDTO question = selectedQuestions.get(i);
+                
+                ExamQuestion examQuestion = new ExamQuestion();
+                examQuestion.setExam(savedExam);
+                examQuestion.setQuestionId(question.getId());
+                examQuestion.setOrderNumber(i + 1);
+                
+                examQuestionRepository.save(examQuestion);
+                addedQuestionIds.add(question.getId());
+            }
+            
+            log.info("Successfully created exam {} with {} questions", savedExam.getId(), addedQuestionIds.size());
+            
+            // 4. Build response with full question details
+            CreateExamWithQuestionsResponse response = new CreateExamWithQuestionsResponse();
+            response.setExamId(savedExam.getId());
+            response.setTitle(savedExam.getTitle());
+            response.setStatus(savedExam.getStatus());
+            response.setDuration(savedExam.getDuration());
+            response.setQuestionCount(savedExam.getQuestionCount());
+            response.setQuestionIds(addedQuestionIds);
+            response.setQuestions(selectedQuestions); // Trả về danh sách câu hỏi đầy đủ kèm đáp án
+            
+            return response;
+        } catch (Exception e) {
+            log.error("Error creating exam with random questions", e);
+            throw new RuntimeException("Failed to create exam with random questions: " + e.getMessage(), e);
+        }
     }
 }

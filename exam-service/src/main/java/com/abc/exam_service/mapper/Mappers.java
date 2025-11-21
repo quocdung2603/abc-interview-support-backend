@@ -19,6 +19,7 @@ public abstract class Mappers {
     @Mapping(target = "questionTypes", expression = "java(convertStringToList(entity.getQuestionTypes()))")
     public abstract ExamResponse toResponse(Exam entity);
 
+    @Mapping(target = "exam", ignore = true)
     public abstract ExamQuestion toEntity(ExamQuestionRequest req);
     @Mapping(target = "examId", source = "exam.id")
     public abstract ExamQuestionResponse toResponse(ExamQuestion entity);

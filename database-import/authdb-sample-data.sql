@@ -16,12 +16,12 @@ ON CONFLICT (role_name) DO NOTHING;
 -- Note: In production, passwords should be properly hashed
 -- These are just for testing purposes
 
--- Sample users for testing (passwords are 'password123' hashed with BCrypt)
+-- Sample users for testing (password: 'admin123' hashed with BCrypt)
 INSERT INTO users(email, password, full_name, role_id, status, created_at) VALUES 
-('admin@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Admin User', 3, 'ACTIVE', NOW()),
-('recruiter@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Recruiter User', 2, 'ACTIVE', NOW()),
-('user@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Regular User', 1, 'ACTIVE', NOW()),
-('test@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Test User', 1, 'PENDING', NOW())
+('admin@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Admin User', 3, 'ACTIVE', NOW()),
+('recruiter@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Recruiter User', 2, 'ACTIVE', NOW()),
+('user@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Regular User', 1, 'ACTIVE', NOW()),
+('test@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Test User', 1, 'PENDING', NOW())
 ON CONFLICT (email) DO NOTHING;
 
 -- Sample verification tokens

@@ -1,0 +1,170 @@
+{
+  "endpoint": "POST /exams/with-random-questions",
+  "description": "Tạo exam và thêm câu hỏi ngẫu nhiên trong một lần gọi API",
+  "features": {
+    "status": "DRAFT (không publish, dùng cho tự luyện tập)",
+    "type": "PRACTICE (tự học)",
+    "permission": "USER, ADMIN, hoặc RECRUITER",
+    "functionality": "Tự động tìm và thêm câu hỏi ngẫu nhiên vào exam mới"
+  },
+  "samples": [
+    {
+      "name": "ReactJS Junior Multiple Choice",
+      "description": "Tạo bài thi ReactJS cho Junior với 5 câu hỏi trắc nghiệm",
+      "request": {
+        "title": "Bài luyện tập ReactJS cơ bản",
+        "position": "Front-end Developer",
+        "duration": 60,
+        "language": "vi",
+        "field": "Lập trình viên",
+        "topics": ["ReactJS"],
+        "level": "Junior",
+        "questionType": "Multiple Choice",
+        "numberOfQuestions": 5
+      },
+      "expectedResponse": {
+        "examId": 1,
+        "title": "Bài luyện tập ReactJS cơ bản",
+        "status": "DRAFT",
+        "duration": 60,
+        "questionCount": 5,
+        "questionIds": [1, 2, 3, 4, 5]
+      }
+    },
+    {
+      "name": "Spring Boot Middle Open Ended",
+      "description": "Tạo bài thi Spring Boot cho Middle với câu hỏi tự luận",
+      "request": {
+        "title": "Spring Boot Advanced Topics",
+        "position": "Back-end Developer",
+        "duration": 90,
+        "language": "vi",
+        "field": "Lập trình viên",
+        "topics": ["Spring Boot"],
+        "level": "Middle",
+        "questionType": "Open Ended",
+        "numberOfQuestions": 3
+      },
+      "expectedResponse": {
+        "examId": 2,
+        "title": "Spring Boot Advanced Topics",
+        "status": "DRAFT",
+        "duration": 90,
+        "questionCount": 3,
+        "questionIds": [10, 11, 12]
+      }
+    },
+    {
+      "name": "VueJS Fresher Practice",
+      "description": "Bài tập VueJS cho người mới bắt đầu",
+      "request": {
+        "title": "VueJS Basics Practice",
+        "position": "Front-end Developer",
+        "duration": 45,
+        "language": "vi",
+        "field": "Lập trình viên",
+        "topics": ["VueJS"],
+        "level": "Fresher",
+        "questionType": "Multiple Choice",
+        "numberOfQuestions": 3
+      },
+      "expectedResponse": {
+        "examId": 3,
+        "title": "VueJS Basics Practice",
+        "status": "DRAFT",
+        "duration": 45,
+        "questionCount": 3,
+        "questionIds": [20, 21, 22]
+      }
+    },
+    {
+      "name": "Automated Testing for QA",
+      "description": "Bài test về Automated Testing cho QA Engineer",
+      "request": {
+        "title": "Automated Testing Fundamentals",
+        "position": "QA Engineer",
+        "duration": 60,
+        "language": "vi",
+        "field": "Tester",
+        "topics": ["Automated Testing"],
+        "level": "Fresher",
+        "questionType": "Multiple Choice",
+        "numberOfQuestions": 5
+      },
+      "expectedResponse": {
+        "examId": 4,
+        "title": "Automated Testing Fundamentals",
+        "status": "DRAFT",
+        "duration": 60,
+        "questionCount": 5,
+        "questionIds": [30, 31, 32, 33, 34]
+      }
+    },
+    {
+      "name": "Mixed Topics Practice",
+      "description": "Bài tập với nhiều chủ đề (hệ thống sẽ chọn ngẫu nhiên)",
+      "request": {
+        "title": "Full Stack Developer Practice",
+        "position": "Full Stack Developer",
+        "duration": 120,
+        "language": "vi",
+        "field": "Lập trình viên",
+        "topics": ["ReactJS", "Spring Boot", "VueJS"],
+        "level": "Junior",
+        "questionType": "Multiple Choice",
+        "numberOfQuestions": 10
+      },
+      "note": "Hệ thống sẽ tìm câu hỏi phù hợp với field, level, questionType và BẤT KỲ topic nào trong danh sách"
+    }
+  ],
+  "curlExamples": [
+    {
+      "name": "ReactJS Junior Test",
+      "curl": "curl -X POST http://localhost:8080/exams/with-random-questions \\\n  -H \"Content-Type: application/json; charset=utf-8\" \\\n  -H \"Authorization: Bearer YOUR_TOKEN_HERE\" \\\n  -d '{\n    \"title\": \"ReactJS Practice Exam\",\n    \"position\": \"Developer\",\n    \"duration\": 60,\n    \"language\": \"vi\",\n    \"field\": \"Lập trình viên\",\n    \"topics\": [\"ReactJS\"],\n    \"level\": \"Junior\",\n    \"questionType\": \"Multiple Choice\",\n    \"numberOfQuestions\": 5\n  }'"
+    }
+  ],
+  "powerShellExample": {
+    "description": "Ví dụ gọi API bằng PowerShell",
+    "code": "$headers = @{\n  'Content-Type' = 'application/json; charset=utf-8'\n  'Authorization' = \"Bearer $token\"\n}\n\n$bodyObj = @{\n  title = 'ReactJS Practice'\n  position = 'Developer'\n  duration = 60\n  language = 'vi'\n  field = 'Lập trình viên'\n  topics = @('ReactJS')\n  level = 'Junior'\n  questionType = 'Multiple Choice'\n  numberOfQuestions = 5\n}\n\n$body = [System.Text.Encoding]::UTF8.GetBytes(($bodyObj | ConvertTo-Json))\n\n$response = Invoke-RestMethod `\n  -Uri 'http://localhost:8080/exams/with-random-questions' `\n  -Method POST `\n  -Headers $headers `\n  -Body $body `\n  -ContentType 'application/json; charset=utf-8'\n\n$response | ConvertTo-Json"
+  },
+  "availableData": {
+    "fields": ["Lập trình viên", "Tester"],
+    "topics": ["ReactJS", "Spring Boot", "VueJS", "Automated Testing"],
+    "levels": ["Fresher", "Junior", "Middle"],
+    "questionTypes": ["Multiple Choice", "Open Ended"],
+    "currentQuestionDistribution": [
+      {"field": "Lập trình viên", "topic": "ReactJS", "level": "Junior", "type": "Multiple Choice", "count": 2},
+      {"field": "Lập trình viên", "topic": "Spring Boot", "level": "Middle", "type": "Open Ended", "count": 1},
+      {"field": "Lập trình viên", "topic": "ReactJS", "level": "Junior", "type": "Open Ended", "count": 1},
+      {"field": "Tester", "topic": "Automated Testing", "level": "Fresher", "type": "Multiple Choice", "count": 1},
+      {"field": "Lập trình viên", "topic": "VueJS", "level": "Fresher", "type": "Multiple Choice", "count": 1}
+    ]
+  },
+  "validationRules": {
+    "title": "Bắt buộc, tối đa 200 ký tự",
+    "duration": "Bắt buộc, tối thiểu 1 phút",
+    "language": "Bắt buộc (ví dụ: 'vi', 'en')",
+    "numberOfQuestions": "Bắt buộc, từ 1 đến 100 câu"
+  },
+  "errorScenarios": [
+    {
+      "scenario": "Không tìm thấy câu hỏi phù hợp",
+      "request": {
+        "field": "Non-existent Field",
+        "topics": ["Non-existent Topic"],
+        "level": "Senior",
+        "questionType": "Multiple Choice",
+        "numberOfQuestions": 10
+      },
+      "expectedError": "No questions found matching the criteria"
+    },
+    {
+      "scenario": "Thiếu trường bắt buộc",
+      "request": {
+        "title": "Test",
+        "duration": 60
+      },
+      "expectedError": "Validation error: language is required"
+    }
+  ]
+}

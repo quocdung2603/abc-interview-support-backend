@@ -13,13 +13,14 @@ INSERT INTO roles(role_name, description) VALUES
 ON CONFLICT (role_name) DO NOTHING;
 
 -- Sample users with detailed information
+-- Password for all users: admin123
 INSERT INTO users(role_id, email, password, full_name, date_of_birth, address, status, is_studying, elo_score, elo_rank, verify_token, created_at) VALUES 
-(3, 'admin@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Admin User', '1985-01-15', '123 Admin Street, Ho Chi Minh City', 'ACTIVE', false, 0, 'NEWBIE', NULL, NOW()),
-(2, 'recruiter@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Recruiter User', '1988-03-20', '456 Recruiter Avenue, Hanoi', 'ACTIVE', false, 0, 'NEWBIE', NULL, NOW()),
-(1, 'user@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'John Doe', '1995-06-10', '789 User Lane, Da Nang', 'ACTIVE', true, 1200, 'LEARNER', NULL, NOW()),
-(1, 'test@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Test User', '1998-12-05', '321 Test Road, Can Tho', 'PENDING', true, 800, 'NEWBIE', 'sample-verify-token-123', NOW()),
-(1, 'student@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Student User', '2000-08-15', '654 Student Street, Hue', 'ACTIVE', true, 950, 'NEWBIE', NULL, NOW()),
-(1, 'developer@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 'Developer User', '1992-04-22', '987 Developer Boulevard, Hai Phong', 'ACTIVE', false, 1500, 'EXPERT', NULL, NOW())
+(3, 'admin@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Admin User', '1985-01-15', '123 Admin Street, Ho Chi Minh City', 'ACTIVE', false, 0, 'NEWBIE', NULL, NOW()),
+(2, 'recruiter@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Recruiter User', '1988-03-20', '456 Recruiter Avenue, Hanoi', 'ACTIVE', false, 0, 'NEWBIE', NULL, NOW()),
+(1, 'user@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'John Doe', '1995-06-10', '789 User Lane, Da Nang', 'ACTIVE', true, 1200, 'LEARNER', NULL, NOW()),
+(1, 'test@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Test User', '1998-12-05', '321 Test Road, Can Tho', 'PENDING', true, 800, 'NEWBIE', 'sample-verify-token-123', NOW()),
+(1, 'student@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Student User', '2000-08-15', '654 Student Street, Hue', 'ACTIVE', true, 950, 'NEWBIE', NULL, NOW()),
+(1, 'developer@example.com', '$2a$10$.ox16FHE5rz4MiHNChR0jeJWy40xPDCIuL/ShGaP.jhLSV2kH0/7.', 'Developer User', '1992-04-22', '987 Developer Boulevard, Hai Phong', 'ACTIVE', false, 1500, 'EXPERT', NULL, NOW())
 ON CONFLICT (email) DO NOTHING;
 
 -- Sample ELO history

@@ -75,7 +75,20 @@ spring:
 
         - id: news-service
           uri: lb://NEWS-SERVICE
-          predicates: [ Path=/news/**, Path=/recruitments/** ]
+          predicates:
+            - Path=/news/**
+          filters:
+            - AddUserInfoToHeader
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                key-resolver: "#{@remoteAddrKeyResolver}"
+
+        - id: recruitments-service
+          uri: lb://NEWS-SERVICE
+          predicates:
+            - Path=/recruitments/**
           filters:
             - AddUserInfoToHeader
             - name: RequestRateLimiter

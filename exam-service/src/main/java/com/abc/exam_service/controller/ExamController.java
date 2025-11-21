@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -58,6 +59,19 @@ public class ExamController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('RECRUITER')")
     public ExamQuestionResponse addQuestionToExam(@RequestBody ExamQuestionRequest req) {
         return examService.addQuestionToExam(req);
+    }
+
+    @PostMapping("/with-random-questions")
+    public CreateExamWithQuestionsResponse createExamWithRandomQuestions(
+            @jakarta.validation.Valid @RequestBody CreateExamWithQuestionsRequest req,
+            @RequestHeader(value = "X-User-Id", required = false, defaultValue = "1") Long userId) {
+        return examService.createExamWithRandomQuestions(req, userId);
+    }
+
+    @PostMapping("/questions/random")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('RECRUITER')")
+    public RandomQuestionsResponse addRandomQuestionsToExam(@jakarta.validation.Valid @RequestBody RandomQuestionsRequest req) {
+        return examService.addRandomQuestionsToExam(req);
     }
 
     @DeleteMapping("/{examId}/questions")

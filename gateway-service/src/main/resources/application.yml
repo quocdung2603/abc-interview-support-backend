@@ -111,8 +111,7 @@ spring:
         - id: news-service
           uri: http://news-service:8087
           predicates:
-            - Path=/news/**
-            - Path=/recruitments/**
+            - Path=/news,/news/**,/recruitments,/recruitments/**
 
         # News Service Swagger
         - id: news-swagger-ui
@@ -128,13 +127,28 @@ spring:
           filters:
             - RewritePath=/news/v3/api-docs,/v3/api-docs
 
-        # NLP Service
-        - id: nlp-service
+        # NLP Service - Health
+        - id: nlp-health
           uri: http://nlp-service:8088
           predicates:
             - Path=/health
+
+        # NLP Service - Grading
+        - id: nlp-grading
+          uri: http://nlp-service:8088
+          predicates:
             - Path=/grading/**
+
+        # NLP Service - Similarity
+        - id: nlp-similarity
+          uri: http://nlp-service:8088
+          predicates:
             - Path=/questions/similarity/**
+
+        # NLP Service - AI Studio
+        - id: nlp-ai-studio
+          uri: http://nlp-service:8088
+          predicates:
             - Path=/ai-studio/**
       globalcors:
         cors-configurations:

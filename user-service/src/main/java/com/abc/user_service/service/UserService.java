@@ -1,6 +1,7 @@
 package com.abc.user_service.service;
 
 import com.abc.user_service.dto.request.*;
+import com.abc.user_service.dto.response.EloHistoryResponse;
 import com.abc.user_service.dto.response.UserResponse;
 import com.abc.user_service.entity.*;
 import com.abc.user_service.mapper.UserMapper;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -221,5 +224,33 @@ public class UserService {
                         .description(role.getDescription())
                         .build())
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    // Elo History methods
+    public Page<EloHistoryResponse> getEloHistory(Long userId, Pageable pageable) {
+        return eloHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(userMapper::toEloHistoryResponse);
+    }
+
+    public List<EloHistoryResponse> getRecentEloHistory(Long userId, Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 10;
+        }
+        List<EloHistory> histories = limit == 10 
+            ? eloHistoryRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId)
+            : eloHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+        
+        return histories.stream()
+                .map(userMapper::toEloHistoryResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<EloHistoryResponse> getAllEloHistory(Long userId) {
+        return eloHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(userMapper::toEloHistoryResponse)
+                .collect(Collectors.toList());
     }
 }

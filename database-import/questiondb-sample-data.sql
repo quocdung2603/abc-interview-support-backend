@@ -6,7 +6,7 @@
 \c questiondb;
 
 -- Insert sample fields
-INSERT INTO fields(field_name, description) VALUES 
+INSERT INTO fields(name, description) VALUES 
 ('Lập trình viên', 'Ngành lập trình phần mềm'),
 ('Business Analyst', 'Phân tích nghiệp vụ'),
 ('Tester', 'Kiểm thử phần mềm'),
@@ -16,7 +16,7 @@ INSERT INTO fields(field_name, description) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert sample topics
-INSERT INTO topics(field_id, topic_name, description) VALUES 
+INSERT INTO topics(field_id, name, description) VALUES 
 (1, 'ReactJS', 'Thư viện JavaScript cho UI'),
 (1, 'VueJS', 'Framework JavaScript cho UI'),
 (1, 'Angular', 'Framework TypeScript cho UI'),
@@ -45,7 +45,7 @@ INSERT INTO topics(field_id, topic_name, description) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert sample levels
-INSERT INTO levels(level_name, description) VALUES 
+INSERT INTO levels(name, description) VALUES 
 ('Fresher', 'Mới ra trường, 0-1 năm kinh nghiệm'),
 ('Junior', '1-2 năm kinh nghiệm'),
 ('Middle', '2-4 năm kinh nghiệm'),
@@ -55,7 +55,7 @@ INSERT INTO levels(level_name, description) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert sample question types
-INSERT INTO question_types(question_type_name, description) VALUES 
+INSERT INTO question_types(name, description) VALUES 
 ('Multiple Choice', 'Câu hỏi trắc nghiệm'),
 ('Open Ended', 'Câu hỏi tự luận'),
 ('True/False', 'Câu hỏi đúng/sai'),
@@ -80,7 +80,7 @@ INSERT INTO questions(user_id, topic_id, field_id, level_id, question_type_id, q
 (3, 1, 1, 2, 1, 'What are React Hooks and name some commonly used ones?', 'React Hooks are functions that let you use state and other React features in functional components. Common hooks include: useState, useEffect, useContext, useReducer, and useCallback.', 0.0, 'PENDING', 'en', NOW() - INTERVAL '2 hours', NULL, NULL, 0, 0);
 
 -- Insert sample answers
-INSERT INTO answers(user_id, question_id, question_type_id, answer_content, is_correct, similarity_score, useful_vote, unuseful_vote, is_sample_answer, order_number, created_at) VALUES 
+INSERT INTO answers(user_id, question_id, question_type_id, content, is_correct, similarity_score, useful_vote, unuseful_vote, is_sample_answer, order_number, created_at) VALUES
 (3, 1, 1, 'ReactJS is a JavaScript library for building user interfaces. Main features include: Virtual DOM, Component-based architecture, JSX, One-way data binding, and React Hooks.', true, 0.0, 8, 1, true, 1, NOW() - INTERVAL '9 days'),
 (4, 1, 1, 'ReactJS is a frontend library that helps create interactive UIs. Key features are Virtual DOM for performance, reusable components, and declarative programming.', true, 0.0, 5, 0, false, 2, NOW() - INTERVAL '8 days'),
 (5, 1, 1, 'React is a library for building web applications. It uses JSX syntax and has features like state management and component lifecycle methods.', true, 0.0, 3, 1, false, 3, NOW() - INTERVAL '7 days'),

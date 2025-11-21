@@ -23,12 +23,15 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/users/internal/**").permitAll()
                         .requestMatchers("/users/check-email/**").permitAll()
                         .requestMatchers("/users/by-email/**").permitAll()
                         .requestMatchers("/users/validate-password").permitAll()
                         .requestMatchers("/users/verify-token").permitAll()
                         .requestMatchers("/users/roles").permitAll()
+                        .requestMatchers("/users/*/elo-history/**").permitAll() // Elo History endpoints
+                        .requestMatchers("/users/elo").permitAll() // Apply Elo points
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -23,4 +23,5 @@ public class ExamResponse {
     private String language;
     private LocalDateTime createdAt;
     private Long createdBy;
+    private List<QuestionDTO> questions; // Danh sách câu hỏi kèm theo
 }
