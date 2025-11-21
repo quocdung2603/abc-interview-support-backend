@@ -144,3 +144,4 @@ logging:
 # CHO DECODER (HS256): cùng secret với auth-service (Base64)
 jwt:
   secret: "UCIafMmHwgsJKIgg4xVAL/eOvR3ZXD/ZnYE9AfMaMQg="
+# push check
