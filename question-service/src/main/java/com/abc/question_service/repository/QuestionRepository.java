@@ -27,4 +27,20 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "LEFT JOIN FETCH q.questionType " +
            "WHERE q.id = :id")
     Question findByIdWithRelationships(@Param("id") Long id);
+    
+    // Search questions by numeric IDs
+    @Query("SELECT q FROM Question q " +
+           "LEFT JOIN FETCH q.field f " +
+           "LEFT JOIN FETCH q.topic t " +
+           "LEFT JOIN FETCH q.level l " +
+           "LEFT JOIN FETCH q.questionType qt " +
+           "WHERE (:fieldId IS NULL OR f.id = :fieldId) " +
+           "AND (:topicIds IS NULL OR t.id IN :topicIds) " +
+           "AND (:levelId IS NULL OR l.id = :levelId) " +
+           "AND (:questionTypeId IS NULL OR qt.id = :questionTypeId) " +
+           "AND q.status = 'APPROVED'")
+    List<Question> searchByIds(@Param("fieldId") Long fieldId,
+                                @Param("topicIds") List<Long> topicIds,
+                                @Param("levelId") Long levelId,
+                                @Param("questionTypeId") Long questionTypeId);
 }

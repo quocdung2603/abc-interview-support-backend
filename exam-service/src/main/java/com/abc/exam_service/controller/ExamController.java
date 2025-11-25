@@ -76,8 +76,8 @@ public class ExamController {
 
     @DeleteMapping("/{examId}/questions")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RECRUITER')")
-    public void removeQuestionsFromExam(@PathVariable Long examId) {
-        examService.removeQuestionsFromExam(examId);
+    public DeleteResponse removeQuestionsFromExam(@PathVariable Long examId) {
+        return examService.removeQuestionsFromExam(examId);
     }
 
     @PostMapping("/results")
@@ -151,8 +151,8 @@ public class ExamController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RECRUITER')")
-    public void deleteExam(@PathVariable Long id) {
-        examService.deleteExam(id);
+    public DeleteResponse deleteExam(@PathVariable Long id) {
+        return examService.deleteExam(id);
     }
 
     @GetMapping("/results/{id}")

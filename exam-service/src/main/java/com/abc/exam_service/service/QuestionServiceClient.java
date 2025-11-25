@@ -121,4 +121,90 @@ public class QuestionServiceClient {
         }
         return true;
     }
+    
+    // Validate if field exists
+    public boolean fieldExists(Long fieldId) {
+        try {
+            String url = QUESTION_SERVICE_URL + "/fields/" + fieldId;
+            log.debug("Checking if field exists: {}", url);
+            restTemplate.getForEntity(url, Map.class);
+            return true;
+        } catch (Exception e) {
+            log.debug("Field {} does not exist", fieldId);
+            return false;
+        }
+    }
+    
+    // Validate if topic exists
+    public boolean topicExists(Long topicId) {
+        try {
+            String url = QUESTION_SERVICE_URL + "/topics/" + topicId;
+            log.debug("Checking if topic exists: {}", url);
+            restTemplate.getForEntity(url, Map.class);
+            return true;
+        } catch (Exception e) {
+            log.debug("Topic {} does not exist", topicId);
+            return false;
+        }
+    }
+    
+    // Validate if level exists
+    public boolean levelExists(Long levelId) {
+        try {
+            String url = QUESTION_SERVICE_URL + "/levels/" + levelId;
+            log.debug("Checking if level exists: {}", url);
+            restTemplate.getForEntity(url, Map.class);
+            return true;
+        } catch (Exception e) {
+            log.debug("Level {} does not exist", levelId);
+            return false;
+        }
+    }
+    
+    // NEW: Search questions by numeric IDs
+    public List<QuestionDTO> searchQuestionsByIds(Long fieldId, List<Long> topicIds, Long levelId, Long questionTypeId, int limit) {
+        try {
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromHttpUrl(QUESTION_SERVICE_URL + "/questions/search");
+            
+            if (fieldId != null) {
+                builder.queryParam("fieldId", fieldId);
+            }
+            if (topicIds != null && !topicIds.isEmpty()) {
+                builder.queryParam("topicIds", topicIds.toArray());
+            }
+            if (levelId != null) {
+                builder.queryParam("levelId", levelId);
+            }
+            if (questionTypeId != null) {
+                builder.queryParam("questionTypeId", questionTypeId);
+            }
+            if (limit > 0) {
+                builder.queryParam("limit", limit);
+            }
+            
+            String url = builder.toUriString();
+            log.info("Calling question service search by IDs: {}", url);
+            
+            ResponseEntity<List<Map>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Map>>() {}
+            );
+            
+            List<Map<String, Object>> content = (List<Map<String, Object>>) (List<?>) response.getBody();
+            
+            // Convert to QuestionDTO
+            List<QuestionDTO> questions = content.stream()
+                    .map(this::mapToQuestionDTO)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            log.info("Found {} questions matching ID criteria", questions.size());
+            return questions;
+        } catch (Exception e) {
+            log.error("Error calling question service search by IDs", e);
+            throw new RuntimeException("Failed to search questions by IDs from question service", e);
+        }
+    }
 }

@@ -20,8 +20,16 @@ public class Exam {
     private String examType; // VIRTUAL, RECRUITER
     private String title;
     private String position;
+    
+    // New: Numeric IDs for field, topic, and level
+    private Long fieldId;
+    private Long topicId;
+    private Long levelId;
+    
+    // Deprecated: Keep for backward compatibility
     private String topics; // JSON array of topic IDs
     private String questionTypes; // JSON array of question type IDs
+    
     private Integer questionCount;
     private Integer duration; // minutes
     private LocalDateTime startTime;

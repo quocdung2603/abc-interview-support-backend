@@ -19,14 +19,14 @@ public class CreateExamWithQuestionsRequest {
     @NotBlank(message = "Language is required")
     private String language;
     
-    // Question criteria for random selection
-    private String field;
+    // Question criteria for random selection - UPDATED TO USE NUMERIC IDs
+    private Long fieldId;
     
-    private List<String> topics;
+    private List<Long> topicIds;
     
-    private String level;
+    private Long levelId;
     
-    private String questionType;
+    private Long questionTypeId;
     
     @NotNull(message = "Number of questions is required")
     @Min(value = 1, message = "Must have at least 1 question")

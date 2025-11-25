@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -41,6 +43,10 @@ public class Question {
     private Long approvedBy;
     private Integer usefulVote;
     private Integer unusefulVote;
+    
+    // Cascade delete: when question is deleted, all associated answers are also deleted
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Answer> answers = new ArrayList<>();
 }
 
 

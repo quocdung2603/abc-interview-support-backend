@@ -1131,7 +1131,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"title\": \"ReactJS Junior Practice Exam\",\n  \"position\": \"Front-end Developer\",\n  \"duration\": 60,\n  \"language\": \"vi\",\n  \"field\": \"Lập trình viên\",\n  \"topics\": [\"ReactJS\"],\n  \"level\": \"Junior\",\n  \"questionType\": \"Multiple Choice\",\n  \"numberOfQuestions\": 2\n}"
+									"raw": "{\n  \"title\": \"ReactJS Junior Practice Exam\",\n  \"position\": \"Front-end Developer\",\n  \"duration\": 60,\n  \"language\": \"vi\",\n  \"fieldId\": 1,\n  \"topicIds\": [3],\n  \"levelId\": 1,\n  \"questionTypeId\": 1,\n  \"numberOfQuestions\": 2\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/exams/with-random-questions",
@@ -1150,7 +1150,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"title\": \"Spring Boot Advanced Topics\",\n  \"position\": \"Back-end Developer\",\n  \"duration\": 90,\n  \"language\": \"vi\",\n  \"field\": \"Lập trình viên\",\n  \"topics\": [\"Spring Boot\"],\n  \"level\": \"Middle\",\n  \"questionType\": \"Open Ended\",\n  \"numberOfQuestions\": 1\n}"
+									"raw": "{\n  \"title\": \"Spring Boot Advanced Topics\",\n  \"position\": \"Back-end Developer\",\n  \"duration\": 90,\n  \"language\": \"vi\",\n  \"fieldId\": 1,\n  \"topicIds\": [1],\n  \"levelId\": 2,\n  \"questionTypeId\": 2,\n  \"numberOfQuestions\": 1\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/exams/with-random-questions",
@@ -1169,7 +1169,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"title\": \"Automated Testing Fundamentals\",\n  \"position\": \"QA Engineer\",\n  \"duration\": 45,\n  \"language\": \"vi\",\n  \"field\": \"Tester\",\n  \"topics\": [\"Automated Testing\"],\n  \"level\": \"Fresher\",\n  \"questionType\": \"Multiple Choice\",\n  \"numberOfQuestions\": 1\n}"
+									"raw": "{\n  \"title\": \"Automated Testing Fundamentals\",\n  \"position\": \"QA Engineer\",\n  \"duration\": 45,\n  \"language\": \"vi\",\n  \"fieldId\": 2,\n  \"topicIds\": [5],\n  \"levelId\": 1,\n  \"questionTypeId\": 1,\n  \"numberOfQuestions\": 1\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/exams/with-random-questions",
@@ -1188,7 +1188,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"title\": \"VueJS Basics for Beginners\",\n  \"position\": \"Front-end Developer\",\n  \"duration\": 30,\n  \"language\": \"vi\",\n  \"field\": \"Lập trình viên\",\n  \"topics\": [\"VueJS\"],\n  \"level\": \"Fresher\",\n  \"questionType\": \"Multiple Choice\",\n  \"numberOfQuestions\": 1\n}"
+									"raw": "{\n  \"title\": \"VueJS Basics for Beginners\",\n  \"position\": \"Front-end Developer\",\n  \"duration\": 30,\n  \"language\": \"vi\",\n  \"fieldId\": 1,\n  \"topicIds\": [4],\n  \"levelId\": 1,\n  \"questionTypeId\": 1,\n  \"numberOfQuestions\": 1\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/exams/with-random-questions",
@@ -1207,7 +1207,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"title\": \"Full Stack Developer Practice\",\n  \"position\": \"Full Stack Developer\",\n  \"duration\": 120,\n  \"language\": \"vi\",\n  \"field\": \"Lập trình viên\",\n  \"topics\": [\"ReactJS\", \"Spring Boot\", \"VueJS\"],\n  \"level\": \"Junior\",\n  \"questionType\": \"Multiple Choice\",\n  \"numberOfQuestions\": 3\n}"
+									"raw": "{\n  \"title\": \"Full Stack Developer Practice\",\n  \"position\": \"Full Stack Developer\",\n  \"duration\": 120,\n  \"language\": \"vi\",\n  \"fieldId\": 1,\n  \"topicIds\": [1, 3, 4],\n  \"levelId\": 2,\n  \"questionTypeId\": 1,\n  \"numberOfQuestions\": 3\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/exams/with-random-questions",
@@ -1226,7 +1226,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"title\": \"Invalid Criteria Test\",\n  \"position\": \"Developer\",\n  \"duration\": 30,\n  \"language\": \"en\",\n  \"field\": \"Non-existent Field\",\n  \"topics\": [\"Non-existent Topic\"],\n  \"level\": \"Senior\",\n  \"questionType\": \"Multiple Choice\",\n  \"numberOfQuestions\": 10\n}"
+									"raw": "{\n  \"title\": \"Invalid Criteria Test\",\n  \"position\": \"Developer\",\n  \"duration\": 30,\n  \"language\": \"en\",\n  \"fieldId\": 999,\n  \"topicIds\": [999],\n  \"levelId\": 999,\n  \"questionTypeId\": 999,\n  \"numberOfQuestions\": 10\n}"
 								},
 								"url": {
 									"raw": "{{base_url}}/exams/with-random-questions",
@@ -1237,7 +1237,7 @@
 							}
 						}
 					],
-					"description": "🎯 **NEW FEATURE**: Create exam and add random questions in ONE API call\n\n**Key Features**:\n- ✅ Status: DRAFT (not published, for self-practice)\n- ✅ Type: PRACTICE (self-study)\n- ✅ Permission: USER, ADMIN, or RECRUITER\n- ✅ Auto-selects and shuffles questions\n- ✅ Combines 2 steps into 1\n\n**Available Data in Database**:\n- **Fields**: Lập trình viên, Tester, Business Analyst, DevOps, Data Science\n- **Topics**: ReactJS (2 MC + 1 OE), Spring Boot (1 OE), VueJS (1 MC), Automated Testing (1 MC)\n- **Levels**: Fresher, Junior, Middle, Senior\n- **Types**: Multiple Choice, Open Ended\n\n**Request Body Schema**:\n```json\n{\n  \"title\": \"string (required, max 200 chars)\",\n  \"position\": \"string (optional)\",\n  \"duration\": \"integer (required, min 1 minute)\",\n  \"language\": \"string (required, e.g. 'vi', 'en')\",\n  \"field\": \"string (optional, must match DB)\",\n  \"topics\": [\"array of strings (optional)\"],\n  \"level\": \"string (optional)\",\n  \"questionType\": \"string (optional)\",\n  \"numberOfQuestions\": \"integer (required, 1-100)\"\n}\n```\n\n**Response Schema**:\n```json\n{\n  \"examId\": 1,\n  \"title\": \"ReactJS Practice\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 3]\n}\n```\n\n📚 **See SAMPLE-DATA-CREATE-EXAM.md** for detailed documentation and more examples."
+					"description": "🎯 **UPDATED**: Create exam with random questions using NUMERIC IDs (Fixed Unicode encoding issues)\n\n**Key Features**:\n- ✅ Status: DRAFT (not published, for self-practice)\n- ✅ Type: PRACTICE (self-study)\n- ✅ Permission: USER, ADMIN, or RECRUITER\n- ✅ Auto-selects and shuffles questions\n- ✅ Uses numeric IDs instead of text strings\n- ✅ Solves Vietnamese character encoding issues\n\n**Available Data in Database**:\n- **Fields**: 1=Lập trình viên, 2=Tester, 3=Business Analyst, 4=DevOps, 5=Data Science\n- **Topics**: 1=Spring Boot, 3=ReactJS, 4=VueJS, 5=Automated Testing\n- **Levels**: 1=Fresher, 2=Junior, 3=Middle, 4=Senior\n- **Types**: 1=Multiple Choice, 2=Open Ended\n\n**Request Body Schema (UPDATED)**:\n```json\n{\n  \"title\": \"string (required, max 200 chars)\",\n  \"position\": \"string (optional)\",\n  \"duration\": \"integer (required, min 1 minute)\",\n  \"language\": \"string (required, e.g. 'vi', 'en')\",\n  \"fieldId\": \"integer (optional, numeric ID)\",\n  \"topicIds\": [\"array of integers (optional, numeric IDs)\"],\n  \"levelId\": \"integer (optional, numeric ID)\",\n  \"questionTypeId\": \"integer (optional, numeric ID)\",\n  \"numberOfQuestions\": \"integer (required, 1-100)\"\n}\n```\n\n**Response Schema**:\n```json\n{\n  \"examId\": 1,\n  \"title\": \"ReactJS Practice\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 3],\n  \"questions\": []\n}\n```"
 				},
 				{
 					"name": "🎫 Registrations",

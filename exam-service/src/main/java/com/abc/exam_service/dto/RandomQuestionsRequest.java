@@ -11,13 +11,14 @@ public class RandomQuestionsRequest {
     @NotNull(message = "Exam ID is required")
     private Long examId;
     
-    private String field;
+    // UPDATED TO USE NUMERIC IDs instead of text strings
+    private Long fieldId;
     
-    private List<String> topics;
+    private List<Long> topicIds;
     
-    private String level;
+    private Long levelId;
     
-    private String questionType;
+    private Long questionTypeId;
     
     @NotNull(message = "Number of questions is required")
     @Min(value = 1, message = "Must request at least 1 question")

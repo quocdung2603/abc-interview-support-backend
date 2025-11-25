@@ -28,9 +28,28 @@ public class ExamService {
     private final ExamRegistrationRepository examRegistrationRepository;
     private final QuestionServiceClient questionServiceClient;
     private final Mappers mappers;
+    private final jakarta.persistence.EntityManager entityManager;
 
+    @Transactional
     public ExamResponse createExam(ExamRequest req) {
+        // Validate that referenced IDs exist
+        if (req.getFieldId() != null && !questionServiceClient.fieldExists(req.getFieldId())) {
+            throw new RuntimeException("Field not found with id: " + req.getFieldId());
+        }
+        if (req.getTopicId() != null && !questionServiceClient.topicExists(req.getTopicId())) {
+            throw new RuntimeException("Topic not found with id: " + req.getTopicId());
+        }
+        if (req.getLevelId() != null && !questionServiceClient.levelExists(req.getLevelId())) {
+            throw new RuntimeException("Level not found with id: " + req.getLevelId());
+        }
+        
         Exam exam = mappers.toEntity(req);
+        
+        // Set numeric ID fields for new design
+        exam.setFieldId(req.getFieldId());
+        exam.setTopicId(req.getTopicId());
+        exam.setLevelId(req.getLevelId());
+        
         exam.setStatus("DRAFT");
         exam.setCreatedAt(LocalDateTime.now());
         exam.setCreatedBy(req.getUserId());
@@ -81,8 +100,25 @@ public class ExamService {
         return mappers.toResponse(saved);
     }
 
-    public void removeQuestionsFromExam(Long examId) {
+    @Transactional
+    public DeleteResponse removeQuestionsFromExam(Long examId) {
+        // Verify exam exists before attempting deletion
+        if (!examRepository.existsById(examId)) {
+            throw new RuntimeException("Exam not found with id: " + examId);
+        }
+        
+        // Count questions before deletion
+        long questionCount = examQuestionRepository.countByExamId(examId);
+        
+        // Delete all exam questions within transaction
         examQuestionRepository.deleteByExamId(examId);
+        entityManager.flush();
+        
+        return DeleteResponse.builder()
+                .success(true)
+                .message("Successfully removed " + questionCount + " question(s) from exam")
+                .id(examId)
+                .build();
     }
 
     public ResultResponse submitResult(ResultRequest req) {
@@ -167,20 +203,87 @@ public class ExamService {
         return response;
     }
 
+    @Transactional
     public ExamResponse updateExam(Long id, ExamRequest req) {
+        // Validate that referenced IDs exist
+        if (req.getFieldId() != null && !questionServiceClient.fieldExists(req.getFieldId())) {
+            throw new RuntimeException("Field not found with id: " + req.getFieldId());
+        }
+        if (req.getTopicId() != null && !questionServiceClient.topicExists(req.getTopicId())) {
+            throw new RuntimeException("Topic not found with id: " + req.getTopicId());
+        }
+        if (req.getLevelId() != null && !questionServiceClient.levelExists(req.getLevelId())) {
+            throw new RuntimeException("Level not found with id: " + req.getLevelId());
+        }
+        
         Exam exam = examRepository.findById(id).orElseThrow();
         exam.setTitle(req.getTitle());
         exam.setPosition(req.getPosition());
+        
+        // Update numeric ID fields
+        exam.setFieldId(req.getFieldId());
+        exam.setTopicId(req.getTopicId());
+        exam.setLevelId(req.getLevelId());
+        
+        // Keep backward compatibility with list fields
         exam.setTopics(req.getTopics() != null ? req.getTopics().toString() : null);
         exam.setQuestionTypes(req.getQuestionTypes() != null ? req.getQuestionTypes().toString() : null);
+        
         exam.setQuestionCount(req.getQuestionCount());
         exam.setDuration(req.getDuration());
         exam.setLanguage(req.getLanguage());
         return mappers.toResponse(examRepository.save(exam));
     }
 
-    public void deleteExam(Long id) {
+    @Transactional
+    public DeleteResponse deleteExam(Long id) {
+        // Verify exam exists
+        Exam exam = examRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + id));
+        
+        String examTitle = exam.getTitle();
+        
+        log.info("Deleting exam {} with title: {}", id, examTitle);
+        
+        // Delete related data first - must flush after each delete to ensure FK constraints are satisfied
+        // Order matters: delete child records before parent
+        
+        // 1. Delete exam questions (child of exam)
+        log.info("Deleting exam questions for exam {}", id);
+        examQuestionRepository.deleteByExamId(id);
+        entityManager.flush();
+        entityManager.clear(); // Clear persistence context to ensure delete is committed
+        
+        // 2. Delete user answers (child of exam)
+        log.info("Deleting user answers for exam {}", id);
+        userAnswerRepository.deleteByExamId(id);
+        entityManager.flush();
+        entityManager.clear();
+        
+        // 3. Delete results (child of exam)
+        log.info("Deleting results for exam {}", id);
+        resultRepository.deleteByExamId(id);
+        entityManager.flush();
+        entityManager.clear();
+        
+        // 4. Delete registrations (child of exam)
+        log.info("Deleting registrations for exam {}", id);
+        examRegistrationRepository.deleteByExamId(id);
+        entityManager.flush();
+        entityManager.clear();
+        
+        // 5. Finally delete exam (parent)
+        log.info("Deleting exam {}", id);
         examRepository.deleteById(id);
+        entityManager.flush();
+        
+        log.info("Successfully deleted exam {} with title: {}", id, examTitle);
+        
+        return DeleteResponse.builder()
+                .success(true)
+                .message("Successfully deleted exam: " + examTitle)
+                .id(id)
+                .build();
     }
 
     public ResultResponse getResultById(Long id) {
@@ -202,15 +305,15 @@ public class ExamService {
             Exam exam = examRepository.findById(req.getExamId())
                     .orElseThrow(() -> new RuntimeException("Exam not found with id: " + req.getExamId()));
             
-            log.info("Fetching random questions for exam {} with criteria: field={}, topics={}, level={}, type={}, count={}", 
-                    req.getExamId(), req.getField(), req.getTopics(), req.getLevel(), req.getQuestionType(), req.getNumberOfQuestions());
+            log.info("Fetching random questions for exam {} with criteria: fieldId={}, topicIds={}, levelId={}, typeId={}, count={}", 
+                    req.getExamId(), req.getFieldId(), req.getTopicIds(), req.getLevelId(), req.getQuestionTypeId(), req.getNumberOfQuestions());
             
-            // Fetch questions from question-service
-            List<QuestionDTO> questions = questionServiceClient.searchQuestions(
-                    req.getField(),
-                    req.getTopics(),
-                    req.getLevel(),
-                    req.getQuestionType(),
+            // Fetch questions from question-service using numeric IDs
+            List<QuestionDTO> questions = questionServiceClient.searchQuestionsByIds(
+                    req.getFieldId(),
+                    req.getTopicIds(),
+                    req.getLevelId(),
+                    req.getQuestionTypeId(),
                     req.getNumberOfQuestions() * 2 // Fetch more to have options
             );
             
@@ -268,15 +371,15 @@ public class ExamService {
     @Transactional
     public CreateExamWithQuestionsResponse createExamWithRandomQuestions(CreateExamWithQuestionsRequest req, Long userId) {
         try {
-            log.info("Creating exam with random questions for user {}: title={}, field={}, topics={}, level={}, type={}, count={}", 
-                    userId, req.getTitle(), req.getField(), req.getTopics(), req.getLevel(), req.getQuestionType(), req.getNumberOfQuestions());
+            log.info("Creating exam with random questions for user {}: title={}, fieldId={}, topicIds={}, levelId={}, typeId={}, count={}", 
+                    userId, req.getTitle(), req.getFieldId(), req.getTopicIds(), req.getLevelId(), req.getQuestionTypeId(), req.getNumberOfQuestions());
             
-            // 1. Fetch random questions first
-            List<QuestionDTO> questions = questionServiceClient.searchQuestions(
-                    req.getField(),
-                    req.getTopics(),
-                    req.getLevel(),
-                    req.getQuestionType(),
+            // 1. Fetch random questions first using numeric IDs
+            List<QuestionDTO> questions = questionServiceClient.searchQuestionsByIds(
+                    req.getFieldId(),
+                    req.getTopicIds(),
+                    req.getLevelId(),
+                    req.getQuestionTypeId(),
                     req.getNumberOfQuestions() * 2 // Fetch more to have options
             );
             
@@ -306,8 +409,14 @@ public class ExamService {
             exam.setCreatedAt(LocalDateTime.now());
             exam.setCreatedBy(userId);
             
+            // Store numeric IDs to avoid Unicode encoding issues
+            exam.setFieldId(req.getFieldId());
+            exam.setTopicId(req.getTopicIds() != null && !req.getTopicIds().isEmpty() ? req.getTopicIds().get(0) : null);
+            exam.setLevelId(req.getLevelId());
+            
             Exam savedExam = examRepository.save(exam);
-            log.info("Created exam with id: {}", savedExam.getId());
+            log.info("Created exam with id: {} (fieldId={}, topicId={}, levelId={})", 
+                    savedExam.getId(), savedExam.getFieldId(), savedExam.getTopicId(), savedExam.getLevelId());
             
             // 3. Add questions to exam
             List<Long> addedQuestionIds = new ArrayList<>();

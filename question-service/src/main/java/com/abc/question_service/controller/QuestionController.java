@@ -18,6 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/questions")
 @RequiredArgsConstructor
@@ -298,4 +300,17 @@ public class QuestionController {
 
     @GetMapping("/{questionId}/answers")
     public Page<AnswerResponse> listAnswers(@PathVariable Long questionId, Pageable pageable) { return svc.listAnswersByQuestion(questionId, pageable); }
+    
+    // Search questions by numeric IDs
+    @GetMapping("/search")
+    @Operation(summary = "Search questions by numeric IDs", description = "Search questions using field, topic, level, and question type IDs")
+    @ApiResponse(responseCode = "200", description = "Questions found")
+    public List<QuestionResponse> searchQuestions(
+        @Parameter(description = "Field ID") @RequestParam(required = false) Long fieldId,
+        @Parameter(description = "Topic IDs") @RequestParam(required = false) List<Long> topicIds,
+        @Parameter(description = "Level ID") @RequestParam(required = false) Long levelId,
+        @Parameter(description = "Question Type ID") @RequestParam(required = false) Long questionTypeId,
+        @Parameter(description = "Maximum number of results") @RequestParam(required = false) Integer limit) {
+        return svc.searchQuestionsByIds(fieldId, topicIds, levelId, questionTypeId, limit);
+    }
 }

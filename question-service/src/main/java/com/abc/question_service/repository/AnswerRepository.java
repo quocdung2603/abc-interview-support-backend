@@ -9,4 +9,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     Page<Answer> findByQuestionId(Long questionId, Pageable pageable);
+    
+    // Delete all answers associated with a question
+    void deleteByQuestionId(Long questionId);
+    
+    // Count answers for a question
+    long countByQuestionId(Long questionId);
 }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -214,10 +215,12 @@ public class QuestionService {
         return mappers.toResponse(questionRepository.findByIdWithRelationships(question.getId()));
     }
     
+    @Transactional
     public void deleteQuestion(Long id) {
         if (!questionRepository.existsById(id)) {
             throw new RuntimeException("Question not found with id: " + id);
         }
+        // Cascade delete will automatically remove all associated answers
         questionRepository.deleteById(id);
     }
 
@@ -306,5 +309,19 @@ public class QuestionService {
 
     public Page<AnswerResponse> listAnswersByQuestion(Long questionId, Pageable pageable) {
         return answerRepository.findByQuestionId(questionId, pageable).map(mappers::toResponse);
+    }
+    
+    // Search questions by numeric IDs
+    public List<QuestionResponse> searchQuestionsByIds(Long fieldId, List<Long> topicIds, Long levelId, Long questionTypeId, Integer limit) {
+        List<Question> questions = questionRepository.searchByIds(fieldId, topicIds, levelId, questionTypeId);
+        
+        // Limit results if specified
+        if (limit != null && limit > 0 && questions.size() > limit) {
+            questions = questions.subList(0, limit);
+        }
+        
+        return questions.stream()
+                .map(mappers::toResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 }
