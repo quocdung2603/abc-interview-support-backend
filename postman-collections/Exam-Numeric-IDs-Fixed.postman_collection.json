@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "exam-numeric-ids-collection",
-		"name": "Exam APIs with Numeric IDs (Fixed)",
-		"description": "Fixed exam APIs using numeric IDs (fieldId, topicId, levelId) to solve Unicode encoding issues with Vietnamese characters. Response includes both numeric IDs and text names.",
+		"_postman_id": "exam-numeric-ids-fixed-2025",
+		"name": "✅ Exam APIs - Numeric IDs Fixed (Unicode Safe)",
+		"description": "Fixed exam APIs using numeric IDs (fieldId, topicId, levelId) to solve Unicode encoding issues with Vietnamese characters. Response includes both numeric IDs and text names.\n\n## Problem Solved\n- ❌ Before: Text strings caused encoding errors (\"Lập trình viên\" → \"L???p tr??nh vi??n\")\n- ✅ After: Numeric IDs are encoding-independent\n\n## Key Changes\n1. Database: Added field_id, topic_id, level_id columns\n2. Request: Use numeric IDs instead of text strings\n3. Response: Includes both IDs (for queries) and names (for display)\n\n## Usage\n1. Get available IDs: GET /questions/fields, /topics, /levels\n2. Create exam: POST /exams/with-random-questions with numeric IDs\n3. Verify: Response includes both fieldId and field name",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"version": "2.0.0"
 	},
@@ -35,7 +35,7 @@
 			"response": []
 		},
 		{
-			"name": "2. Create Exam with Random Questions (Numeric IDs)",
+			"name": "2. ⭐ Create Exam with Random Questions (FIXED)",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -58,7 +58,7 @@
 					"host": ["{{base_url}}"],
 					"path": ["exams", "with-random-questions"]
 				},
-				"description": "Create an exam and automatically add random questions based on numeric ID criteria (fieldId, topicIds, levelId). This API stores numeric IDs in the database to avoid Unicode encoding issues.\n\nResponse format:\n```json\n{\n  \"examId\": 57,\n  \"title\": \"Spring Boot Practice Exam\",\n  \"status\": \"DRAFT\",\n  \"duration\": 45,\n  \"questionCount\": 5,\n  \"questionIds\": [1, 2, 3, 4, 5],\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"fieldId\": 1,\n      \"topicIds\": [1],\n      \"levelId\": 2,\n      \"questionTypeId\": 1,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"Spring Boot\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Multiple Choice\",\n      \"questionText\": \"What is Spring Boot?\",\n      \"questionAnswer\": \"A framework...\"\n    }\n  ]\n}\n```\n\nNote: Response includes both numeric IDs (fieldId, topicIds, levelId) and text names (field, topics, level) for display."
+				"description": "✅ FIXED: Create exam with random questions using numeric IDs.\n\n**What's Fixed:**\n- Uses fieldId, topicIds, levelId (numeric) instead of text strings\n- Stores numeric IDs in database (field_id, topic_id, level_id columns)\n- No more Unicode encoding errors\n\n**Response includes:**\n- Numeric IDs: fieldId, topicIds, levelId, questionTypeId\n- Text names: field, topics, level, questionType (for display)\n- Both Vietnamese and English text display correctly\n\n**Example Response:**\n```json\n{\n  \"examId\": 57,\n  \"title\": \"Spring Boot Practice Exam\",\n  \"status\": \"DRAFT\",\n  \"duration\": 45,\n  \"questionCount\": 5,\n  \"questionIds\": [1, 2, 3, 4, 5],\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"fieldId\": 1,\n      \"topicIds\": [1],\n      \"levelId\": 2,\n      \"questionTypeId\": 1,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"Spring Boot\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Multiple Choice\",\n      \"questionText\": \"What is Spring Boot?\",\n      \"questionAnswer\": \"A framework...\"\n    }\n  ]\n}\n```"
 			},
 			"response": []
 		},
@@ -85,7 +85,7 @@
 					"host": ["{{base_url}}"],
 					"path": ["exams", "questions", "random"]
 				},
-				"description": "Add random questions to an existing exam using numeric IDs for field, topics, level, and question type. Uses ID-based queries to avoid Unicode encoding issues."
+				"description": "Add random questions to an existing exam using numeric IDs. Uses ID-based queries to avoid Unicode encoding issues."
 			},
 			"response": []
 		},
@@ -168,7 +168,7 @@
 			"response": []
 		},
 		{
-			"name": "6. Get Exam by ID (Verify Numeric IDs Stored)",
+			"name": "6. Get Exam by ID (Verify Numeric IDs)",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -182,7 +182,7 @@
 					"host": ["{{base_url}}"],
 					"path": ["exams", "{{exam_id}}"]
 				},
-				"description": "Get exam details to verify that fieldId, topicId, and levelId are stored correctly in the database.\n\nExpected response:\n```json\n{\n  \"id\": 57,\n  \"userId\": 1,\n  \"examType\": \"PRACTICE\",\n  \"title\": \"Spring Boot Practice Exam\",\n  \"position\": \"Java Developer\",\n  \"fieldId\": 1,\n  \"topicId\": 1,\n  \"levelId\": 2,\n  \"topics\": [1, 2, 3],\n  \"questionTypes\": [1, 2],\n  \"questionCount\": 5,\n  \"duration\": 45,\n  \"status\": \"DRAFT\",\n  \"language\": \"vi\",\n  \"createdAt\": \"2025-11-25T16:42:59.203\",\n  \"createdBy\": 1,\n  \"questions\": [\n    {\n      \"id\": 2,\n      \"fieldId\": 1,\n      \"topicIds\": [1],\n      \"levelId\": 2,\n      \"questionTypeId\": 2,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"ReactJS\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Open Ended\",\n      \"questionText\": \"Explain the concept of Virtual DOM in ReactJS\",\n      \"questionAnswer\": \"Virtual DOM is a JavaScript representation...\"\n    }\n  ]\n}\n```\n\nNote: \n- fieldId, topicId, levelId are numeric (no encoding issues)\n- field, topics, level are text for display (may have Vietnamese characters)\n- Both IDs and names are included in response"
+				"description": "Get exam details to verify that fieldId, topicId, and levelId are stored correctly.\n\n**Expected Response:**\n```json\n{\n  \"id\": 57,\n  \"userId\": 1,\n  \"examType\": \"PRACTICE\",\n  \"title\": \"Spring Boot Practice Exam\",\n  \"position\": \"Java Developer\",\n  \"fieldId\": 1,\n  \"topicId\": 1,\n  \"levelId\": 2,\n  \"topics\": [1, 2, 3],\n  \"questionTypes\": [1, 2],\n  \"questionCount\": 5,\n  \"duration\": 45,\n  \"status\": \"DRAFT\",\n  \"language\": \"vi\",\n  \"createdAt\": \"2025-11-25T16:42:59.203\",\n  \"createdBy\": 1,\n  \"questions\": [\n    {\n      \"id\": 2,\n      \"fieldId\": 1,\n      \"topicIds\": [1],\n      \"levelId\": 2,\n      \"questionTypeId\": 2,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"ReactJS\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Open Ended\",\n      \"questionText\": \"Explain Virtual DOM\",\n      \"questionAnswer\": \"Virtual DOM is...\"\n    }\n  ]\n}\n```\n\n**Verify:**\n- ✅ fieldId, topicId, levelId are numeric (not null)\n- ✅ field, topics, level display correctly (no L???p tr??nh vi??n)\n- ✅ Questions include both IDs and names"
 			},
 			"response": []
 		},
@@ -190,12 +190,7 @@
 			"name": "7. Get All Fields",
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt_token}}"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "{{base_url}}/questions/fields?size=20",
 					"host": ["{{base_url}}"],
@@ -207,7 +202,7 @@
 						}
 					]
 				},
-				"description": "Get list of available fields with their IDs"
+				"description": "Get list of available fields with their IDs. Use these IDs when creating exams."
 			},
 			"response": []
 		},
@@ -215,12 +210,7 @@
 			"name": "8. Get All Topics",
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt_token}}"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "{{base_url}}/questions/topics?size=20",
 					"host": ["{{base_url}}"],
@@ -232,7 +222,7 @@
 						}
 					]
 				},
-				"description": "Get list of available topics with their IDs"
+				"description": "Get list of available topics with their IDs. Use these IDs when creating exams."
 			},
 			"response": []
 		},
@@ -240,12 +230,7 @@
 			"name": "9. Get All Levels",
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt_token}}"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "{{base_url}}/questions/levels?size=20",
 					"host": ["{{base_url}}"],
@@ -257,69 +242,12 @@
 						}
 					]
 				},
-				"description": "Get list of available levels with their IDs"
+				"description": "Get list of available levels with their IDs. Use these IDs when creating exams."
 			},
 			"response": []
 		},
 		{
-			"name": "10. Get Field by ID",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/questions/fields/1",
-					"host": ["{{base_url}}"],
-					"path": ["questions", "fields", "1"]
-				},
-				"description": "Get specific field by ID to verify it exists"
-			},
-			"response": []
-		},
-		{
-			"name": "11. Get Topic by ID",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/questions/topics/1",
-					"host": ["{{base_url}}"],
-					"path": ["questions", "topics", "1"]
-				},
-				"description": "Get specific topic by ID to verify it exists"
-			},
-			"response": []
-		},
-		{
-			"name": "12. Get Level by ID",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/questions/levels/1",
-					"host": ["{{base_url}}"],
-					"path": ["questions", "levels", "1"]
-				},
-				"description": "Get specific level by ID to verify it exists"
-			},
-			"response": []
-		},
-		{
-			"name": "13. Test: Create Exam with Vietnamese Characters",
+			"name": "10. Test: Vietnamese Characters",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -341,21 +269,7 @@
 					"host": ["{{base_url}}"],
 					"path": ["exams", "with-random-questions"]
 				},
-				"description": "Test creating exam with Vietnamese characters in title and position. The numeric IDs ensure no encoding issues in database queries.\n\nExpected: Response should show Vietnamese characters correctly in both request fields (title, position) and question fields (field, topics, level names)."
-			},
-			"response": []
-		},
-		{
-			"name": "14. Verify Database: Check Numeric IDs Stored",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/exams/{{exam_id}}",
-					"host": ["{{base_url}}"],
-					"path": ["exams", "{{exam_id}}"]
-				},
-				"description": "Verify that the exam was created with numeric IDs stored in database.\n\nCheck response for:\n1. fieldId, topicId, levelId are present and numeric\n2. field, topics, level text names display correctly (no L???p tr??nh vi??n)\n3. Questions array includes both IDs and names\n\nSQL equivalent:\n```sql\nSELECT id, title, field_id, topic_id, level_id \nFROM exams \nWHERE id = {{exam_id}};\n```\n\nExpected result: field_id, topic_id, level_id columns should have numeric values, not NULL."
+				"description": "✅ Test creating exam with Vietnamese characters.\n\n**Expected Result:**\n- Title and position with Vietnamese characters are stored correctly\n- Response shows Vietnamese field/topic/level names correctly\n- No encoding errors (no L???p tr??nh vi??n)\n- Database stores numeric IDs, not text strings"
 			},
 			"response": []
 		}
@@ -373,8 +287,9 @@
 		},
 		{
 			"key": "exam_id",
-			"value": "1",
-			"type": "string"
+			"value": "57",
+			"type": "string",
+			"description": "Example exam ID with numeric IDs stored"
 		}
 	]
 }

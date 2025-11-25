@@ -18,14 +18,11 @@ public class ExamRequest {
     
     private String position;
     
-    // New: Numeric IDs for field, topic, and level
-    @NotNull(message = "Field ID is required")
+    // New: Numeric IDs for field, topic, and level (optional for backward compatibility)
     private Long fieldId;
     
-    @NotNull(message = "Topic ID is required")
     private Long topicId;
     
-    @NotNull(message = "Level ID is required")
     private Long levelId;
     
     // Deprecated: Keep for backward compatibility

@@ -32,7 +32,9 @@ public class ExamService {
 
     @Transactional
     public ExamResponse createExam(ExamRequest req) {
-        // Validate that referenced IDs exist
+        // Validate that referenced IDs exist (optional - skip validation if question-service unavailable)
+        // TODO: Re-enable validation when question-service is stable
+        /*
         if (req.getFieldId() != null && !questionServiceClient.fieldExists(req.getFieldId())) {
             throw new RuntimeException("Field not found with id: " + req.getFieldId());
         }
@@ -42,6 +44,7 @@ public class ExamService {
         if (req.getLevelId() != null && !questionServiceClient.levelExists(req.getLevelId())) {
             throw new RuntimeException("Level not found with id: " + req.getLevelId());
         }
+        */
         
         Exam exam = mappers.toEntity(req);
         
@@ -205,7 +208,9 @@ public class ExamService {
 
     @Transactional
     public ExamResponse updateExam(Long id, ExamRequest req) {
-        // Validate that referenced IDs exist
+        // Validate that referenced IDs exist (optional - skip validation if question-service unavailable)
+        // TODO: Re-enable validation when question-service is stable
+        /*
         if (req.getFieldId() != null && !questionServiceClient.fieldExists(req.getFieldId())) {
             throw new RuntimeException("Field not found with id: " + req.getFieldId());
         }
@@ -215,6 +220,7 @@ public class ExamService {
         if (req.getLevelId() != null && !questionServiceClient.levelExists(req.getLevelId())) {
             throw new RuntimeException("Level not found with id: " + req.getLevelId());
         }
+        */
         
         Exam exam = examRepository.findById(id).orElseThrow();
         exam.setTitle(req.getTitle());

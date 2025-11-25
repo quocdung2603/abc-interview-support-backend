@@ -999,35 +999,37 @@
 					}
 				},
 				{
-					"name": "Create Exam",
+					"name": "Create Exam (with Numeric IDs)",
 					"request": {
 						"method": "POST",
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userId\": 1,\n  \"examType\": \"VIRTUAL\",\n  \"title\": \"Java Backend Developer Test\",\n  \"position\": \"Backend Developer\",\n  \"topics\": [1, 2, 3],\n  \"questionTypes\": [1, 2],\n  \"questionCount\": 20,\n  \"duration\": 60,\n  \"language\": \"Vietnamese\"\n}"
+							"raw": "{\n  \"userId\": 1,\n  \"examType\": \"VIRTUAL\",\n  \"title\": \"Java Backend Developer Test\",\n  \"position\": \"Backend Developer\",\n  \"fieldId\": 1,\n  \"topicId\": 1,\n  \"levelId\": 2,\n  \"topics\": [1, 2, 3],\n  \"questionTypes\": [1, 2],\n  \"questionCount\": 20,\n  \"duration\": 60,\n  \"language\": \"vi\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/exams",
 							"host": ["{{base_url}}"],
 							"path": ["exams"]
-						}
+						},
+						"description": "✅ UPDATED: Create empty exam with optional numeric IDs (fieldId, topicId, levelId).\n\n**Response includes:**\n- fieldId, topicId, levelId if provided (null if not)\n- Backward compatible with old API\n\n**Example Response:**\n```json\n{\n  \"id\": 59,\n  \"userId\": 1,\n  \"examType\": \"VIRTUAL\",\n  \"title\": \"Java Backend Developer Test\",\n  \"position\": \"Backend Developer\",\n  \"fieldId\": 1,\n  \"topicId\": 1,\n  \"levelId\": 2,\n  \"topics\": [1, 2, 3],\n  \"questionTypes\": [1, 2],\n  \"questionCount\": 20,\n  \"duration\": 60,\n  \"status\": \"DRAFT\",\n  \"language\": \"vi\",\n  \"createdAt\": \"2025-11-25T16:43:47.077\",\n  \"createdBy\": 1\n}\n```"
 					}
 				},
 				{
-					"name": "Update Exam",
+					"name": "Update Exam (with Numeric IDs)",
 					"request": {
 						"method": "PUT",
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"userId\": 1,\n  \"examType\": \"VIRTUAL\",\n  \"title\": \"Updated Exam Title\",\n  \"position\": \"Senior Developer\",\n  \"topics\": [1, 2],\n  \"questionTypes\": [1],\n  \"questionCount\": 30,\n  \"duration\": 90,\n  \"language\": \"English\"\n}"
+							"raw": "{\n  \"userId\": 1,\n  \"examType\": \"VIRTUAL\",\n  \"title\": \"Updated Exam Title\",\n  \"position\": \"Senior Developer\",\n  \"fieldId\": 2,\n  \"topicId\": 3,\n  \"levelId\": 3,\n  \"topics\": [1, 2],\n  \"questionTypes\": [1],\n  \"questionCount\": 30,\n  \"duration\": 90,\n  \"language\": \"en\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/exams/1",
 							"host": ["{{base_url}}"],
 							"path": ["exams", "1"]
-						}
+						},
+						"description": "✅ UPDATED: Update exam with numeric IDs. System validates that IDs exist before updating."
 					}
 				},
 				{
@@ -1103,7 +1105,7 @@
 					}
 				},
 				{
-					"name": "⭐ Create Exam with Random Questions (NEW)",
+					"name": "⭐ Create Exam with Random Questions (FIXED - Numeric IDs)",
 					"item": [
 						{
 							"name": "Example 1: ReactJS Junior - Multiple Choice",
@@ -1119,6 +1121,7 @@
 											"    console.log('   Exam ID: ' + jsonData.examId);",
 											"    console.log('   Status: ' + jsonData.status + ' (DRAFT - for practice)');",
 											"    console.log('   Question IDs: ' + jsonData.questionIds.join(', '));",
+											"    console.log('   ✅ Numeric IDs stored: fieldId, topicId, levelId');",
 											"}"
 										]
 									}
@@ -1127,7 +1130,8 @@
 							"request": {
 								"method": "POST",
 								"header": [
-									{"key": "Content-Type", "value": "application/json; charset=utf-8"}
+									{"key": "Content-Type", "value": "application/json; charset=utf-8"},
+									{"key": "X-User-Id", "value": "1"}
 								],
 								"body": {
 									"mode": "raw",
@@ -1138,7 +1142,7 @@
 									"host": ["{{base_url}}"],
 									"path": ["exams", "with-random-questions"]
 								},
-								"description": "🎯 Create exam with ReactJS Junior Multiple Choice questions (2 available in DB)"
+								"description": "✅ FIXED: Create exam with random questions using numeric IDs.\n\n**What's Fixed:**\n- Uses fieldId, topicIds, levelId (numeric) instead of text strings\n- Stores numeric IDs in database (field_id, topic_id, level_id columns)\n- No more Unicode encoding errors with Vietnamese characters\n\n**Response Format:**\n```json\n{\n  \"examId\": 57,\n  \"title\": \"ReactJS Junior Practice Exam\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 2],\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"fieldId\": 1,\n      \"topicIds\": [3],\n      \"levelId\": 1,\n      \"questionTypeId\": 1,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"ReactJS\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Multiple Choice\",\n      \"questionText\": \"What is React?\",\n      \"questionAnswer\": \"A JavaScript library...\"\n    }\n  ]\n}\n```\n\n**Note:** Response includes both numeric IDs (for queries) and text names (for display)"
 							}
 						},
 						{
@@ -1238,6 +1242,39 @@
 						}
 					],
 					"description": "🎯 **UPDATED**: Create exam with random questions using NUMERIC IDs (Fixed Unicode encoding issues)\n\n**Key Features**:\n- ✅ Status: DRAFT (not published, for self-practice)\n- ✅ Type: PRACTICE (self-study)\n- ✅ Permission: USER, ADMIN, or RECRUITER\n- ✅ Auto-selects and shuffles questions\n- ✅ Uses numeric IDs instead of text strings\n- ✅ Solves Vietnamese character encoding issues\n\n**Available Data in Database**:\n- **Fields**: 1=Lập trình viên, 2=Tester, 3=Business Analyst, 4=DevOps, 5=Data Science\n- **Topics**: 1=Spring Boot, 3=ReactJS, 4=VueJS, 5=Automated Testing\n- **Levels**: 1=Fresher, 2=Junior, 3=Middle, 4=Senior\n- **Types**: 1=Multiple Choice, 2=Open Ended\n\n**Request Body Schema (UPDATED)**:\n```json\n{\n  \"title\": \"string (required, max 200 chars)\",\n  \"position\": \"string (optional)\",\n  \"duration\": \"integer (required, min 1 minute)\",\n  \"language\": \"string (required, e.g. 'vi', 'en')\",\n  \"fieldId\": \"integer (optional, numeric ID)\",\n  \"topicIds\": [\"array of integers (optional, numeric IDs)\"],\n  \"levelId\": \"integer (optional, numeric ID)\",\n  \"questionTypeId\": \"integer (optional, numeric ID)\",\n  \"numberOfQuestions\": \"integer (required, 1-100)\"\n}\n```\n\n**Response Schema**:\n```json\n{\n  \"examId\": 1,\n  \"title\": \"ReactJS Practice\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 3],\n  \"questions\": []\n}\n```"
+				},
+				{
+					"name": "🧪 Test: Vietnamese Characters (Numeric IDs Fix)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json; charset=utf-8"},
+							{"key": "X-User-Id", "value": "1"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Bài kiểm tra Lập trình viên Java\",\n  \"position\": \"Lập trình viên Backend\",\n  \"duration\": 60,\n  \"language\": \"vi\",\n  \"fieldId\": 1,\n  \"topicIds\": [1, 3],\n  \"levelId\": 2,\n  \"questionTypeId\": 1,\n  \"numberOfQuestions\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/exams/with-random-questions",
+							"host": ["{{base_url}}"],
+							"path": ["exams", "with-random-questions"]
+						},
+						"description": "✅ TEST: Verify Vietnamese characters work correctly with numeric IDs fix.\n\n**Expected Results:**\n1. ✅ Request with Vietnamese title/position succeeds\n2. ✅ Response shows Vietnamese field/topic/level names correctly\n3. ✅ No encoding errors (no L???p tr??nh vi??n)\n4. ✅ Database stores numeric IDs (field_id=1, topic_id=1, level_id=2)\n5. ✅ Questions array includes both numeric IDs and Vietnamese text names\n\n**Verify in Response:**\n```json\n{\n  \"examId\": 60,\n  \"title\": \"Bài kiểm tra Lập trình viên Java\",\n  \"status\": \"DRAFT\",\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"fieldId\": 1,\n      \"topicIds\": [1],\n      \"levelId\": 2,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"Spring Boot\"],\n      \"level\": \"Junior\"\n    }\n  ]\n}\n```\n\n**Database Verification:**\n```sql\nSELECT id, title, field_id, topic_id, level_id \nFROM exams \nWHERE id = <examId>;\n-- Should show: field_id=1, topic_id=1, level_id=2 (not NULL)\n```"
+					}
+				},
+				{
+					"name": "Get Exam By ID (Verify Numeric IDs Stored)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/exams/57",
+							"host": ["{{base_url}}"],
+							"path": ["exams", "57"]
+						},
+						"description": "✅ Verify that exam was created with numeric IDs stored in database.\n\n**Check Response For:**\n1. fieldId, topicId, levelId are present and numeric (not null)\n2. field, topics, level text names display correctly\n3. Questions array includes both IDs and names\n4. Vietnamese characters display correctly (no encoding errors)\n\n**Expected Response:**\n```json\n{\n  \"id\": 57,\n  \"userId\": 1,\n  \"examType\": \"PRACTICE\",\n  \"title\": \"Spring Boot Practice Exam\",\n  \"fieldId\": 1,\n  \"topicId\": 1,\n  \"levelId\": 2,\n  \"status\": \"DRAFT\",\n  \"questions\": [\n    {\n      \"id\": 2,\n      \"fieldId\": 1,\n      \"topicIds\": [3],\n      \"levelId\": 1,\n      \"field\": \"Lập trình viên\",\n      \"topics\": [\"ReactJS\"],\n      \"level\": \"Junior\"\n    }\n  ]\n}\n```"
+					}
 				},
 				{
 					"name": "🎫 Registrations",

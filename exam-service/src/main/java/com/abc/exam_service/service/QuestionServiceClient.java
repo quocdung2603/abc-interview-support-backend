@@ -84,11 +84,27 @@ public class QuestionServiceClient {
     private QuestionDTO mapToQuestionDTO(Map<String, Object> map) {
         QuestionDTO dto = new QuestionDTO();
         dto.setId(((Number) map.get("id")).longValue());
+        
+        // Map numeric IDs (preferred - encoding independent)
+        if (map.get("fieldId") != null) {
+            dto.setFieldId(((Number) map.get("fieldId")).longValue());
+        }
+        if (map.get("topicId") != null) {
+            dto.setTopicIds(List.of(((Number) map.get("topicId")).longValue()));
+        }
+        if (map.get("levelId") != null) {
+            dto.setLevelId(((Number) map.get("levelId")).longValue());
+        }
+        if (map.get("questionTypeId") != null) {
+            dto.setQuestionTypeId(((Number) map.get("questionTypeId")).longValue());
+        }
+        
+        // Map text names (for display - may have encoding issues)
         dto.setField((String) map.get("fieldName"));
         dto.setLevel((String) map.get("levelName"));
         dto.setQuestionType((String) map.get("questionTypeName"));
         dto.setQuestionText((String) map.get("questionContent"));
-        dto.setQuestionAnswer((String) map.get("questionAnswer")); // Thêm answer
+        dto.setQuestionAnswer((String) map.get("questionAnswer"));
         
         // Topics - might be a list or single topic
         String topicName = (String) map.get("topicName");
@@ -126,11 +142,12 @@ public class QuestionServiceClient {
     public boolean fieldExists(Long fieldId) {
         try {
             String url = QUESTION_SERVICE_URL + "/fields/" + fieldId;
-            log.debug("Checking if field exists: {}", url);
+            log.info("Checking if field exists: {}", url);
             restTemplate.getForEntity(url, Map.class);
+            log.info("Field {} exists", fieldId);
             return true;
         } catch (Exception e) {
-            log.debug("Field {} does not exist", fieldId);
+            log.error("Field {} validation failed: {}", fieldId, e.getMessage());
             return false;
         }
     }
