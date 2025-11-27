@@ -262,6 +262,37 @@ services:
       timeout: 10s
       retries: 3
 
+  social-service:
+    build: ./social-service
+    container_name: interview-social-service
+    ports:
+      - "${SOCIAL_SERVICE_PORT:-8090}:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      SOCIAL_DB: socialdb
+      SOCIAL_SERVICE_PORT: 8090
+      SERVER_SERVLET_ENCODING_CHARSET: UTF-8
+      SERVER_SERVLET_ENCODING_FORCE: "true"
+      JWT_SECRET: ${JWT_SECRET}
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URI: http://config-service:8888
+    networks:
+      - interview-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   postgres_data:
     driver: local

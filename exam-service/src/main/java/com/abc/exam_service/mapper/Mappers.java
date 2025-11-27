@@ -11,12 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class Mappers {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Mapping(target = "topics", expression = "java(convertListToString(req.getTopics()))")
-    @Mapping(target = "questionTypes", expression = "java(convertListToString(req.getQuestionTypes()))")
+    @Mapping(target = "topicIds", expression = "java(convertListToString(req.getTopicIds()))")
+    @Mapping(target = "questionTypeIds", expression = "java(convertListToString(req.getQuestionTypeIds()))")
     public abstract Exam toEntity(ExamRequest req);
     
-    @Mapping(target = "topics", expression = "java(convertStringToList(entity.getTopics()))")
-    @Mapping(target = "questionTypes", expression = "java(convertStringToList(entity.getQuestionTypes()))")
+    @Mapping(target = "topicIds", expression = "java(convertStringToList(entity.getTopicIds()))")
+    @Mapping(target = "questionTypeIds", expression = "java(convertStringToList(entity.getQuestionTypeIds()))")
     public abstract ExamResponse toResponse(Exam entity);
 
     @Mapping(target = "exam", ignore = true)

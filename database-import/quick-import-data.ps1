@@ -27,7 +27,8 @@ $DATABASES = @(
     @{Name="questiondb"; File="questiondb-sample-data.sql"; Description="Question Service"},
     @{Name="careerdb"; File="careerdb-sample-data.sql"; Description="Career Service"},
     @{Name="examdb"; File="examdb-sample-data.sql"; Description="Exam Service"},
-    @{Name="newsdb"; File="newsdb-sample-data.sql"; Description="News Service"}
+    @{Name="newsdb"; File="newsdb-sample-data.sql"; Description="News Service"},
+    @{Name="socialdb"; File="socialdb-sample-data.sql"; Description="Social Service"}
 )
 
 # Function to execute SQL using Docker

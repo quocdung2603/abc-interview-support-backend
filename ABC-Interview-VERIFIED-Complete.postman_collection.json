@@ -1815,6 +1815,108 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "💬 Social Service",
+			"item": [
+				{
+					"name": "Posts",
+					"item": [
+						{
+							"name": "Create Post",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": 1,\n  \"title\": \"My First Post\",\n  \"content\": \"This is the content of my first post.\",\n  \"lockTime\": null\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/posts",
+									"host": ["{{base_url}}"],
+									"path": ["posts"]
+								}
+							}
+						},
+						{
+							"name": "Get All Posts",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{base_url}}/posts?page=0&size=20",
+									"host": ["{{base_url}}"],
+									"path": ["posts"],
+									"query": [
+										{"key": "page", "value": "0"},
+										{"key": "size", "value": "20"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Post By ID",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{base_url}}/posts/1",
+									"host": ["{{base_url}}"],
+									"path": ["posts", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Comments & Voting",
+					"item": [
+						{
+							"name": "Create Comment",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"postId\": 1,\n  \"userId\": 2,\n  \"content\": \"Great post!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": ["{{base_url}}"],
+									"path": ["comments"]
+								}
+							}
+						},
+						{
+							"name": "Get Comments (Auto-sorted by votes/time)",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{base_url}}/comments/post/1",
+									"host": ["{{base_url}}"],
+									"path": ["comments", "post", "1"]
+								},
+								"description": "Sorted by votes DESC (if locked) OR time ASC (if unlocked)"
+							}
+						},
+						{
+							"name": "Vote on Comment",
+							"request": {
+								"method": "POST",
+								"header": [{"key": "Content-Type", "value": "application/json"}],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userId\": 3\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/comments/1/vote",
+									"host": ["{{base_url}}"],
+									"path": ["comments", "1", "vote"]
+								}
+							}
+						}
+					]
+				}
+			]
 		}
 	]
 }
+

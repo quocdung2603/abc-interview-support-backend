@@ -150,6 +150,32 @@ spring:
           uri: http://nlp-service:8088
           predicates:
             - Path=/ai-studio/**
+
+        # Social Service - Posts
+        - id: social-service-posts
+          uri: http://social-service:8090
+          predicates:
+            - Path=/posts,/posts/**
+
+        # Social Service - Comments
+        - id: social-service-comments
+          uri: http://social-service:8090
+          predicates:
+            - Path=/comments,/comments/**
+
+        # Social Service Swagger
+        - id: social-swagger-ui
+          uri: http://social-service:8090
+          predicates:
+            - Path=/social/swagger-ui.html
+          filters:
+            - RewritePath=/social/swagger-ui.html,/swagger-ui.html
+        - id: social-api-docs
+          uri: http://social-service:8090
+          predicates:
+            - Path=/social/v3/api-docs
+          filters:
+            - RewritePath=/social/v3/api-docs,/v3/api-docs
       globalcors:
         cors-configurations:
           '[/**]':

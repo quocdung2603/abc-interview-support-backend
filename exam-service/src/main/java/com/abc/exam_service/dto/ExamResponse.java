@@ -14,14 +14,11 @@ public class ExamResponse {
     private String title;
     private String position;
     
-    // New: Numeric IDs for field, topic, and level
+    // Numeric IDs for field, topics, level, and question types
     private Long fieldId;
-    private Long topicId;
+    private List<Long> topicIds; // Multiple topic IDs
     private Long levelId;
-    
-    // Deprecated: Keep for backward compatibility
-    private List<Long> topics;
-    private List<Long> questionTypes;
+    private List<Long> questionTypeIds; // Multiple question type IDs
     
     private Integer questionCount;
     private Integer duration;

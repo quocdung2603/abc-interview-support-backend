@@ -207,6 +207,7 @@ Nếu muốn dùng PostgreSQL local thay vì Docker:
    CREATE DATABASE examdb;
    CREATE DATABASE newsdb;
    CREATE DATABASE careerdb;
+   CREATE DATABASE socialdb;
    ```
 
 3. **Update connection strings**

@@ -38,8 +38,12 @@ public class ExamService {
         if (req.getFieldId() != null && !questionServiceClient.fieldExists(req.getFieldId())) {
             throw new RuntimeException("Field not found with id: " + req.getFieldId());
         }
-        if (req.getTopicId() != null && !questionServiceClient.topicExists(req.getTopicId())) {
-            throw new RuntimeException("Topic not found with id: " + req.getTopicId());
+        if (req.getTopicIds() != null && !req.getTopicIds().isEmpty()) {
+            for (Long topicId : req.getTopicIds()) {
+                if (!questionServiceClient.topicExists(topicId)) {
+                    throw new RuntimeException("Topic not found with id: " + topicId);
+                }
+            }
         }
         if (req.getLevelId() != null && !questionServiceClient.levelExists(req.getLevelId())) {
             throw new RuntimeException("Level not found with id: " + req.getLevelId());
@@ -48,10 +52,10 @@ public class ExamService {
         
         Exam exam = mappers.toEntity(req);
         
-        // Set numeric ID fields for new design
+        // Set numeric ID fields
         exam.setFieldId(req.getFieldId());
-        exam.setTopicId(req.getTopicId());
         exam.setLevelId(req.getLevelId());
+        // topicIds and questionTypeIds are already set by mapper
         
         exam.setStatus("DRAFT");
         exam.setCreatedAt(LocalDateTime.now());
@@ -214,8 +218,12 @@ public class ExamService {
         if (req.getFieldId() != null && !questionServiceClient.fieldExists(req.getFieldId())) {
             throw new RuntimeException("Field not found with id: " + req.getFieldId());
         }
-        if (req.getTopicId() != null && !questionServiceClient.topicExists(req.getTopicId())) {
-            throw new RuntimeException("Topic not found with id: " + req.getTopicId());
+        if (req.getTopicIds() != null && !req.getTopicIds().isEmpty()) {
+            for (Long topicId : req.getTopicIds()) {
+                if (!questionServiceClient.topicExists(topicId)) {
+                    throw new RuntimeException("Topic not found with id: " + topicId);
+                }
+            }
         }
         if (req.getLevelId() != null && !questionServiceClient.levelExists(req.getLevelId())) {
             throw new RuntimeException("Level not found with id: " + req.getLevelId());
@@ -225,15 +233,23 @@ public class ExamService {
         Exam exam = examRepository.findById(id).orElseThrow();
         exam.setTitle(req.getTitle());
         exam.setPosition(req.getPosition());
+        exam.setExamType(req.getExamType());
         
         // Update numeric ID fields
         exam.setFieldId(req.getFieldId());
-        exam.setTopicId(req.getTopicId());
         exam.setLevelId(req.getLevelId());
         
-        // Keep backward compatibility with list fields
-        exam.setTopics(req.getTopics() != null ? req.getTopics().toString() : null);
-        exam.setQuestionTypes(req.getQuestionTypes() != null ? req.getQuestionTypes().toString() : null);
+        // Update topicIds and questionTypeIds using mapper
+        try {
+            if (req.getTopicIds() != null) {
+                exam.setTopicIds(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(req.getTopicIds()));
+            }
+            if (req.getQuestionTypeIds() != null) {
+                exam.setQuestionTypeIds(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(req.getQuestionTypeIds()));
+            }
+        } catch (Exception e) {
+            log.warn("Failed to serialize IDs", e);
+        }
         
         exam.setQuestionCount(req.getQuestionCount());
         exam.setDuration(req.getDuration());
@@ -417,12 +433,24 @@ public class ExamService {
             
             // Store numeric IDs to avoid Unicode encoding issues
             exam.setFieldId(req.getFieldId());
-            exam.setTopicId(req.getTopicIds() != null && !req.getTopicIds().isEmpty() ? req.getTopicIds().get(0) : null);
             exam.setLevelId(req.getLevelId());
             
+            // Store topicIds and questionTypeIds as JSON strings
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                if (req.getTopicIds() != null && !req.getTopicIds().isEmpty()) {
+                    exam.setTopicIds(mapper.writeValueAsString(req.getTopicIds()));
+                }
+                if (req.getQuestionTypeId() != null) {
+                    exam.setQuestionTypeIds(mapper.writeValueAsString(List.of(req.getQuestionTypeId())));
+                }
+            } catch (Exception e) {
+                log.warn("Failed to serialize IDs", e);
+            }
+            
             Exam savedExam = examRepository.save(exam);
-            log.info("Created exam with id: {} (fieldId={}, topicId={}, levelId={})", 
-                    savedExam.getId(), savedExam.getFieldId(), savedExam.getTopicId(), savedExam.getLevelId());
+            log.info("Created exam with id: {} (fieldId={}, topicIds={}, levelId={})", 
+                    savedExam.getId(), savedExam.getFieldId(), savedExam.getTopicIds(), savedExam.getLevelId());
             
             // 3. Add questions to exam
             List<Long> addedQuestionIds = new ArrayList<>();

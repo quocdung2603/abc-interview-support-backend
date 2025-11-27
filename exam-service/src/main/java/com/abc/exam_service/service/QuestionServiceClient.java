@@ -85,12 +85,12 @@ public class QuestionServiceClient {
         QuestionDTO dto = new QuestionDTO();
         dto.setId(((Number) map.get("id")).longValue());
         
-        // Map numeric IDs (preferred - encoding independent)
+        // Map numeric IDs only (encoding independent)
         if (map.get("fieldId") != null) {
             dto.setFieldId(((Number) map.get("fieldId")).longValue());
         }
         if (map.get("topicId") != null) {
-            dto.setTopicIds(List.of(((Number) map.get("topicId")).longValue()));
+            dto.setTopicId(((Number) map.get("topicId")).longValue());
         }
         if (map.get("levelId") != null) {
             dto.setLevelId(((Number) map.get("levelId")).longValue());
@@ -99,42 +99,18 @@ public class QuestionServiceClient {
             dto.setQuestionTypeId(((Number) map.get("questionTypeId")).longValue());
         }
         
-        // Map text names (for display - may have encoding issues)
-        dto.setField((String) map.get("fieldName"));
-        dto.setLevel((String) map.get("levelName"));
-        dto.setQuestionType((String) map.get("questionTypeName"));
+        // Map question content and answer
         dto.setQuestionText((String) map.get("questionContent"));
         dto.setQuestionAnswer((String) map.get("questionAnswer"));
-        
-        // Topics - might be a list or single topic
-        String topicName = (String) map.get("topicName");
-        if (topicName != null) {
-            dto.setTopics(List.of(topicName));
-        }
         
         return dto;
     }
     
+    // Deprecated: This method uses text-based matching which has encoding issues
+    // Use searchQuestionsByIds instead for numeric ID-based matching
     private boolean matchesCriteria(QuestionDTO q, String field, List<String> topics, String level, String questionType) {
-        if (field != null && !field.isEmpty() && !field.equalsIgnoreCase(q.getField())) {
-            return false;
-        }
-        if (level != null && !level.isEmpty() && !level.equalsIgnoreCase(q.getLevel())) {
-            return false;
-        }
-        if (questionType != null && !questionType.isEmpty() && !questionType.equalsIgnoreCase(q.getQuestionType())) {
-            return false;
-        }
-        if (topics != null && !topics.isEmpty()) {
-            if (q.getTopics() == null || q.getTopics().isEmpty()) {
-                return false;
-            }
-            boolean hasMatchingTopic = topics.stream()
-                    .anyMatch(t -> q.getTopics().stream().anyMatch(qt -> qt.equalsIgnoreCase(t)));
-            if (!hasMatchingTopic) {
-                return false;
-            }
-        }
+        // This method is deprecated and should not be used
+        // All filtering should be done by question-service using numeric IDs
         return true;
     }
     

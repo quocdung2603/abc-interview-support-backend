@@ -21,7 +21,8 @@ $services = @(
     "question-service",
     "exam-service",
     "career-service",
-    "news-service"
+    "news-service",
+    "social-service"
 )
 
 $buildResults = @()

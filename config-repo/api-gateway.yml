@@ -97,6 +97,30 @@ spring:
                 redis-rate-limiter.burstCapacity: 10
                 key-resolver: "#{@remoteAddrKeyResolver}"
 
+        - id: social-service-posts
+          uri: lb://SOCIAL-SERVICE
+          predicates:
+            - Path=/posts/**
+          filters:
+            - AddUserInfoToHeader
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                key-resolver: "#{@remoteAddrKeyResolver}"
+
+        - id: social-service-comments
+          uri: lb://SOCIAL-SERVICE
+          predicates:
+            - Path=/comments/**
+          filters:
+            - AddUserInfoToHeader
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                key-resolver: "#{@remoteAddrKeyResolver}"
+
       globalcors:
         cors-configurations:
           '[/**]':

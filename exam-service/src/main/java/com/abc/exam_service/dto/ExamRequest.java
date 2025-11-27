@@ -18,19 +18,16 @@ public class ExamRequest {
     
     private String position;
     
-    // New: Numeric IDs for field, topic, and level (optional for backward compatibility)
+    // Numeric IDs for field, topics, level, and question types
     private Long fieldId;
     
-    private Long topicId;
+    @NotEmpty(message = "At least one topic is required")
+    private List<Long> topicIds; // Multiple topic IDs
     
     private Long levelId;
     
-    // Deprecated: Keep for backward compatibility
-    @NotEmpty(message = "At least one topic is required")
-    private List<Long> topics;
-    
     @NotEmpty(message = "At least one question type is required")
-    private List<Long> questionTypes;
+    private List<Long> questionTypeIds; // Multiple question type IDs
     
     @NotNull(message = "Question count is required")
     @Min(value = 1, message = "Must have at least 1 question")
