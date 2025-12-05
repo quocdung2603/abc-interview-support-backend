@@ -50,6 +50,15 @@ management:
     health:
       show-details: always
 
+# Question Generation Configuration
+question:
+  generation:
+    max-target-count: 100000
+    default-batch-size: 100
+    max-batch-size: 1000
+    default-user-id: 1
+    default-approver-id: 1
+
 # Swagger/OpenAPI Configuration
 springdoc:
   api-docs:

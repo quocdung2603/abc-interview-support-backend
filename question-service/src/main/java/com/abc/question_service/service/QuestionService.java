@@ -30,7 +30,15 @@ public class QuestionService {
         return mappers.toResponse(fieldRepository.save(mappers.toEntity(req))); 
     }
     
-    public Page<FieldResponse> getAllFields(Pageable pageable) { 
+    public Page<FieldResponse> getAllFields(Pageable pageable) {
+        // Sort by ID ascending if no sort specified
+        if (pageable.getSort().isUnsorted()) {
+            pageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(), 
+                pageable.getPageSize(), 
+                org.springframework.data.domain.Sort.by("id").ascending()
+            );
+        }
         return fieldRepository.findAll(pageable).map(mappers::toResponse); 
     }
     
@@ -63,7 +71,15 @@ public class QuestionService {
         return mappers.toResponse(topicRepository.findByIdWithField(topic.getId()));
     }
     
-    public Page<TopicResponse> getAllTopics(Pageable pageable) { 
+    public Page<TopicResponse> getAllTopics(Pageable pageable) {
+        // Sort by ID ascending if no sort specified
+        if (pageable.getSort().isUnsorted()) {
+            pageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(), 
+                pageable.getPageSize(), 
+                org.springframework.data.domain.Sort.by("id").ascending()
+            );
+        }
         return topicRepository.findAll(pageable).map(mappers::toResponse); 
     }
     
@@ -99,7 +115,15 @@ public class QuestionService {
         return mappers.toResponse(levelRepository.save(mappers.toEntity(req))); 
     }
     
-    public Page<LevelResponse> getAllLevels(Pageable pageable) { 
+    public Page<LevelResponse> getAllLevels(Pageable pageable) {
+        // Sort by ID ascending if no sort specified
+        if (pageable.getSort().isUnsorted()) {
+            pageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(), 
+                pageable.getPageSize(), 
+                org.springframework.data.domain.Sort.by("id").ascending()
+            );
+        }
         return levelRepository.findAll(pageable).map(mappers::toResponse); 
     }
     
@@ -109,6 +133,7 @@ public class QuestionService {
         return mappers.toResponse(level);
     }
     
+    @Transactional
     public LevelResponse updateLevel(Long id, LevelRequest req) {
         Level level = levelRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Level not found with id: " + id));
@@ -131,7 +156,15 @@ public class QuestionService {
         return mappers.toResponse(questionTypeRepository.save(mappers.toEntity(req))); 
     }
     
-    public Page<QuestionTypeResponse> getAllQuestionTypes(Pageable pageable) { 
+    public Page<QuestionTypeResponse> getAllQuestionTypes(Pageable pageable) {
+        // Sort by ID ascending if no sort specified
+        if (pageable.getSort().isUnsorted()) {
+            pageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(), 
+                pageable.getPageSize(), 
+                org.springframework.data.domain.Sort.by("id").ascending()
+            );
+        }
         return questionTypeRepository.findAll(pageable).map(mappers::toResponse); 
     }
     
@@ -141,6 +174,7 @@ public class QuestionService {
         return mappers.toResponse(questionType);
     }
     
+    @Transactional
     public QuestionTypeResponse updateQuestionType(Long id, QuestionTypeRequest req) {
         QuestionType questionType = questionTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("QuestionType not found with id: " + id));
@@ -184,6 +218,14 @@ public class QuestionService {
     }
 
     public Page<QuestionResponse> getAllQuestions(Pageable pageable) {
+        // Sort by ID ascending if no sort specified
+        if (pageable.getSort().isUnsorted()) {
+            pageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(), 
+                pageable.getPageSize(), 
+                org.springframework.data.domain.Sort.by("id").ascending()
+            );
+        }
         return questionRepository.findAll(pageable).map(mappers::toResponse);
     }
     
@@ -273,6 +315,14 @@ public class QuestionService {
     }
 
     public Page<AnswerResponse> getAllAnswers(Pageable pageable) {
+        // Sort by ID ascending if no sort specified
+        if (pageable.getSort().isUnsorted()) {
+            pageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(), 
+                pageable.getPageSize(), 
+                org.springframework.data.domain.Sort.by("id").ascending()
+            );
+        }
         return answerRepository.findAll(pageable).map(mappers::toResponse);
     }
     

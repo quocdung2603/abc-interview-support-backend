@@ -43,4 +43,20 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                                 @Param("topicIds") List<Long> topicIds,
                                 @Param("levelId") Long levelId,
                                 @Param("questionTypeId") Long questionTypeId);
+    
+    // Check if question content already exists (for uniqueness validation)
+    boolean existsByQuestionContent(String questionContent);
+    
+    // Count questions by field
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.field.id = :fieldId")
+    long countByFieldId(@Param("fieldId") Long fieldId);
+    
+    // Count questions by combination
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.field.id = :fieldId " +
+           "AND q.topic.id = :topicId AND q.level.id = :levelId " +
+           "AND q.questionType.id = :questionTypeId")
+    long countByCombination(@Param("fieldId") Long fieldId,
+                            @Param("topicId") Long topicId,
+                            @Param("levelId") Long levelId,
+                            @Param("questionTypeId") Long questionTypeId);
 }

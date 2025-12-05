@@ -17,4 +17,9 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     
     @EntityGraph(attributePaths = {"field"})
     Page<Topic> findAll(Pageable pageable);
+    
+    boolean existsByNameAndFieldId(String name, Long fieldId);
+    
+    @Query("SELECT COUNT(t) FROM Topic t WHERE t.field.id = :fieldId")
+    long countByFieldId(@Param("fieldId") Long fieldId);
 }

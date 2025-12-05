@@ -48,6 +48,7 @@ public interface Mappers {
     Answer toEntity(AnswerRequest req);
     @Mapping(target = "questionId", source = "question.id")
     @Mapping(target = "questionTypeId", source = "questionType.id")
+    @Mapping(target = "answerContent", source = "content")
     AnswerResponse toResponse(Answer entity);
 }
 
