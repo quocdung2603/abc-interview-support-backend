@@ -13,6 +13,15 @@ public interface UserServiceClient {
     Integer getUserEloRank(Long userId);
     
     /**
+     * Applies ELO points to a user
+     * @param userId The user ID
+     * @param action The action type (e.g., "VOTE_COMMENT")
+     * @param points The points to apply
+     * @param description Optional description
+     */
+    void applyEloPoints(Long userId, String action, Integer points, String description);
+    
+    /**
      * Checks if User Service is available
      * @return true if service is reachable
      */

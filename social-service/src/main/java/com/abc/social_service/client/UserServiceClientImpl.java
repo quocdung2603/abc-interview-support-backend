@@ -4,7 +4,6 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,7 +27,6 @@ public class UserServiceClientImpl implements UserServiceClient {
     private static final int TIMEOUT_SECONDS = 2;
     
     @Override
-    @Cacheable(value = "eloRanks", key = "#userId")
     @CircuitBreaker(name = "userService", fallbackMethod = "getUserEloRankFallback")
     public Integer getUserEloRank(Long userId) {
         try {
@@ -61,6 +59,39 @@ public class UserServiceClientImpl implements UserServiceClient {
         log.warn("User Service unavailable for user {}, using default ELO rank. Error: {}", 
                 userId, e.getMessage());
         return DEFAULT_ELO_RANK;
+    }
+    
+    @Override
+    @CircuitBreaker(name = "userService", fallbackMethod = "applyEloPointsFallback")
+    public void applyEloPoints(Long userId, String action, Integer points, String description) {
+        try {
+            log.debug("Applying {} ELO points to user {} for action: {}", points, userId, action);
+            
+            String url = userServiceUrl + "/users/elo";
+            
+            Map<String, Object> request = Map.of(
+                "userId", userId,
+                "action", action,
+                "points", points,
+                "description", description != null ? description : ""
+            );
+            
+            restTemplate.postForObject(url, request, Map.class);
+            log.info("Successfully applied {} ELO points to user {} for {}", points, userId, action);
+            
+        } catch (Exception e) {
+            log.error("Error applying ELO points to user {}: {}", userId, e.getMessage());
+            throw e; // Let circuit breaker handle it
+        }
+    }
+    
+    /**
+     * Fallback method when applying ELO points fails
+     */
+    private void applyEloPointsFallback(Long userId, String action, Integer points, String description, Exception e) {
+        log.warn("Failed to apply ELO points to user {}. Points will not be awarded. Error: {}", 
+                userId, e.getMessage());
+        // Silently fail - voting should still work even if ELO update fails
     }
     
     @Override

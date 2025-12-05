@@ -9,8 +9,18 @@ import java.time.LocalDateTime;
 
 @Data
 public class PostRequest {
-    @NotNull(message = "User ID is required")
-    private Long userId;
+    // userId will be extracted from authentication context, not from request body
+    
+    @NotNull(message = "Field ID is required")
+    private Long fieldId;
+    
+    @NotNull(message = "Topic ID is required")
+    private Long topicId;
+    
+    private Long levelId;  // Optional
+    
+    @NotBlank(message = "Post type is required")
+    private String postType;  // DISCUSSION or QUESTION
     
     @NotBlank(message = "Title is required")
     @Size(max = 200, message = "Title must not exceed 200 characters")

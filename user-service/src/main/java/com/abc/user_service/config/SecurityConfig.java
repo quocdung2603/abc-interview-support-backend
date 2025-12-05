@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/verify-token").permitAll()
                         .requestMatchers("/users/roles").permitAll()
                         .requestMatchers("/users/*/elo-history/**").permitAll() // Elo History endpoints
+                        .requestMatchers("/users/*/elo").permitAll() // Get user ELO rank (for internal service calls)
                         .requestMatchers("/users/elo").permitAll() // Apply Elo points
                         .anyRequest().authenticated()
                 )

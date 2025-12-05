@@ -58,6 +58,45 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(message.toString(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler(InvalidClassificationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidClassificationException(InvalidClassificationException ex, WebRequest request) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+        errorResponse.put("error", "Bad Request");
+        errorResponse.put("code", "INVALID_CLASSIFICATION");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("fieldErrors", ex.getFieldErrors());
+        errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ClassificationServiceUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleClassificationServiceUnavailableException(
+            ClassificationServiceUnavailableException ex, WebRequest request) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
+        errorResponse.put("error", "Service Unavailable");
+        errorResponse.put("code", "CLASSIFICATION_SERVICE_UNAVAILABLE");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @ExceptionHandler(ClassificationServiceTimeoutException.class)
+    public ResponseEntity<Map<String, Object>> handleClassificationServiceTimeoutException(
+            ClassificationServiceTimeoutException ex, WebRequest request) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.GATEWAY_TIMEOUT.value());
+        errorResponse.put("error", "Gateway Timeout");
+        errorResponse.put("code", "CLASSIFICATION_SERVICE_TIMEOUT");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(errorResponse, HttpStatus.GATEWAY_TIMEOUT);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGlobalException(Exception ex, WebRequest request) {
         return buildErrorResponse("Internal server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, request);

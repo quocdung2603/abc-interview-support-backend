@@ -62,9 +62,12 @@ public class ExamController {
     }
 
     @PostMapping("/with-random-questions")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('RECRUITER')")
     public CreateExamWithQuestionsResponse createExamWithRandomQuestions(
             @jakarta.validation.Valid @RequestBody CreateExamWithQuestionsRequest req,
-            @RequestHeader(value = "X-User-Id", required = false, defaultValue = "1") Long userId) {
+            @RequestHeader(value = "X-User-Id", required = true) Long userId) {
+        // User ID được Gateway tự động extract từ JWT token và forward qua header X-User-Id
+        // Client chỉ cần gửi Authorization: Bearer {token}
         return examService.createExamWithRandomQuestions(req, userId);
     }
 

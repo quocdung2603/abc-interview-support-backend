@@ -23,17 +23,37 @@ public class GatewayConfig {
             @Override
             public GatewayFilter apply(Object config) {
                 return (exchange, chain) -> {
-                    // Forward Authorization header as-is; in future decode JWT and add claims
+                    // Extract user ID from JWT token and add as header
                     HttpHeaders headers = exchange.getRequest().getHeaders();
                     String auth = headers.getFirst(HttpHeaders.AUTHORIZATION);
-                    ServerWebExchange mutated = exchange.mutate()
-                            .request(builder -> {
-                                if (auth != null) {
-                                    builder.header("X-User-Authorization", auth);
+                    
+                    ServerWebExchange.Builder builder = exchange.mutate().request(requestBuilder -> {
+                        if (auth != null) {
+                            requestBuilder.header("X-User-Authorization", auth);
+                            
+                            // Extract user ID from JWT token
+                            try {
+                                if (auth.startsWith("Bearer ")) {
+                                    String token = auth.substring(7);
+                                    // Decode JWT payload (base64)
+                                    String[] parts = token.split("\\.");
+                                    if (parts.length >= 2) {
+                                        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+                                        // Extract "sub" claim (user ID)
+                                        if (payload.contains("\"sub\"")) {
+                                            String sub = payload.split("\"sub\":\"")[1].split("\"")[0];
+                                            requestBuilder.header("X-User-Id", sub);
+                                        }
+                                    }
                                 }
-                            })
-                            .build();
-                    return chain.filter(mutated);
+                            } catch (Exception e) {
+                                // If extraction fails, continue without X-User-Id header
+                                System.err.println("Failed to extract user ID from token: " + e.getMessage());
+                            }
+                        }
+                    });
+                    
+                    return chain.filter(builder.build());
                 };
             }
 

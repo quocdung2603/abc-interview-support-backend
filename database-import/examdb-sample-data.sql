@@ -5,14 +5,14 @@
 -- Connect to examdb
 \c examdb;
 
--- Insert sample exams
-INSERT INTO exams(user_id, exam_type, title, position, topics, question_types, question_count, duration, start_time, end_time, status, language, created_at, created_by) VALUES 
-(1, 'TECHNICAL', 'ReactJS Developer Assessment', 'Frontend Developer', '[1,2,3]', '[1,2]', 20, 60, NOW() + INTERVAL '7 days', NOW() + INTERVAL '7 days 1 hour', 'PUBLISHED', 'en', NOW() - INTERVAL '5 days', 1),
-(1, 'TECHNICAL', 'Java Spring Boot Interview', 'Backend Developer', '[4,7]', '[1,2,6]', 25, 90, NOW() + INTERVAL '10 days', NOW() + INTERVAL '10 days 1.5 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '4 days', 1),
-(2, 'TECHNICAL', 'Full Stack Developer Test', 'Full Stack Developer', '[1,2,4,5]', '[1,2,6]', 30, 120, NOW() + INTERVAL '14 days', NOW() + INTERVAL '14 days 2 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '3 days', 2),
-(1, 'BEHAVIORAL', 'Soft Skills Assessment', 'Any Position', '[]', '[2]', 10, 30, NOW() + INTERVAL '5 days', NOW() + INTERVAL '5 days 30 minutes', 'DRAFT', 'en', NOW() - INTERVAL '2 days', 1),
-(2, 'TECHNICAL', 'DevOps Engineer Interview', 'DevOps Engineer', '[16,17,18,19]', '[1,2,6]', 20, 75, NOW() + INTERVAL '12 days', NOW() + INTERVAL '12 days 1.25 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '1 day', 2),
-(1, 'TECHNICAL', 'Data Science Assessment', 'Data Scientist', '[20,21,22]', '[1,2,7]', 25, 90, NOW() + INTERVAL '8 days', NOW() + INTERVAL '8 days 1.5 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '6 hours', 1);
+-- Insert sample exams with updated schema (numeric IDs)
+INSERT INTO exams(user_id, exam_type, title, position, field_id, topic_ids, level_id, question_type_ids, question_count, duration, start_time, end_time, status, language, created_at, created_by) VALUES 
+(1, 'VIRTUAL', 'ReactJS Developer Assessment', 'Frontend Developer', 1, '[1,2,3]', 3, '[1,2]', 20, 60, NOW() + INTERVAL '7 days', NOW() + INTERVAL '7 days 1 hour', 'PUBLISHED', 'en', NOW() - INTERVAL '5 days', 1),
+(1, 'VIRTUAL', 'Java Spring Boot Interview', 'Backend Developer', 1, '[4,7]', 4, '[1,2,6]', 25, 90, NOW() + INTERVAL '10 days', NOW() + INTERVAL '10 days 1.5 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '4 days', 1),
+(2, 'VIRTUAL', 'Full Stack Developer Test', 'Full Stack Developer', 1, '[1,2,4,5]', 4, '[1,2,6]', 30, 120, NOW() + INTERVAL '14 days', NOW() + INTERVAL '14 days 2 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '3 days', 2),
+(1, 'RECRUITER', 'Soft Skills Assessment', 'Any Position', 2, '[]', 2, '[2]', 10, 30, NOW() + INTERVAL '5 days', NOW() + INTERVAL '5 days 30 minutes', 'DRAFT', 'en', NOW() - INTERVAL '2 days', 1),
+(2, 'VIRTUAL', 'DevOps Engineer Interview', 'DevOps Engineer', 4, '[16,17,18,19]', 4, '[1,2,6]', 20, 75, NOW() + INTERVAL '12 days', NOW() + INTERVAL '12 days 1.25 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '1 day', 2),
+(1, 'VIRTUAL', 'Data Science Assessment', 'Data Scientist', 5, '[20,21,22]', 5, '[1,2,7]', 25, 90, NOW() + INTERVAL '8 days', NOW() + INTERVAL '8 days 1.5 hours', 'PUBLISHED', 'en', NOW() - INTERVAL '6 hours', 1);
 
 -- Insert sample exam questions
 INSERT INTO exam_questions(exam_id, question_id, order_number) VALUES 

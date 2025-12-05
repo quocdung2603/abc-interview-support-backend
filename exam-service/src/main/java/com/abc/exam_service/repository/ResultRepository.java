@@ -14,7 +14,14 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     @Query("SELECT r FROM Result r WHERE r.exam.id = :examId")
     Page<Result> findByExamId(@Param("examId") Long examId, Pageable pageable);
     
+    @Query("SELECT r FROM Result r WHERE r.exam.id = :examId")
+    java.util.List<Result> findByExamId(@Param("examId") Long examId);
+    
     Page<Result> findByUserId(Long userId, Pageable pageable);
+    
+    java.util.List<Result> findByUserId(Long userId);
+    
+    java.util.Optional<Result> findTopByExamIdAndUserIdOrderByCompletedAtDesc(Long examId, Long userId);
     
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Result r WHERE r.exam.id = :examId")

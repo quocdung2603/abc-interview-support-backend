@@ -6,6 +6,10 @@ spring:
     name: social-service
   config:
     import: optional:configserver:${CONFIG_SERVER_URI:http://config-service:8888}
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:postgres}:${POSTGRES_PORT:5432}/${SOCIAL_DB:socialdb}
     username: ${POSTGRES_USER:postgres}
@@ -18,6 +22,19 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+  cache:
+    type: none  # Disable Redis cache temporarily
+    # type: redis
+    # cache-names: eloRanks,classificationFields,classificationTopics,classificationLevels
+    # redis:
+    #   time-to-live: 3600000  # 1 hour in milliseconds
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    timeout: 2000ms
 
 jwt:
   secret: ${JWT_SECRET:UCIafMmHwgsJKIgg4xVAL/eOvR3ZXD/ZnYE9AfMaMQg=}
@@ -38,10 +55,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
   endpoint:
     health:
       show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
 
 # Swagger/OpenAPI Configuration
 springdoc:
@@ -62,7 +82,22 @@ springdoc:
 
 # User Service Configuration
 user-service:
-  url: ${USER_SERVICE_URL:http://user-service:8081}
+  url: ${USER_SERVICE_URL:http://user-service:8082}
+
+# Question Service Configuration
+question-service:
+  url: ${QUESTION_SERVICE_URL:http://question-service:8085}
+  timeout:
+    connect: 2000
+    read: 3000
+
+# ELO Points Configuration
+elo:
+  points:
+    vote-useful: 2      # Points for voting useful
+    vote-unuseful: 1    # Points for voting unuseful
+    receive-useful-vote: 5   # Points for receiving a useful vote on your comment
+    receive-unuseful-vote: -2 # Points for receiving an unuseful vote
 
 # Resilience4j Circuit Breaker Configuration
 resilience4j:
@@ -83,11 +118,16 @@ resilience4j:
           - java.io.IOException
         ignoreExceptions:
           - org.springframework.web.client.HttpClientErrorException
+      questionService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        slowCallRateThreshold: 100
+        slowCallDurationThreshold: 3000ms
+        eventConsumerBufferSize: 10
 
-# Cache Configuration
-spring:
-  cache:
-    type: simple
-    cache-names: eloRanks
-    caffeine:
-      spec: maximumSize=1000,expireAfterWrite=300s
+# Cache Configuration (merged above with spring section)

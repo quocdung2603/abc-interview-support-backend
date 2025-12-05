@@ -1,0 +1,104 @@
+# Prompt to Generate 12,000 Unique IT Interview Questions Using Existing IDs in Docker DB
+
+You are an expert in generating realistic test data for IT interview platforms.
+
+---
+
+## Context: Existing Database IDs
+
+### Fields (id, name)
+- 1: Frontend
+- 2: Backend
+- 3: Data Science
+- 4: Machine Learning
+- 5: DevOps
+- 6: Cloud Computing
+- 7: Mobile Development
+- 8: Cybersecurity
+- 9: Database
+- 10: Software Testing
+
+### Topics (id, fieldId, name)
+- 1: ReactJS (fieldId 1)
+- 2: TypeScript (fieldId 1)
+- 3: Vue.js (fieldId 1)
+- 4: Next.js (fieldId 1)
+- 5: HTML/CSS (fieldId 1)
+- 6: Node.js (fieldId 2)
+- 7: Spring Boot (fieldId 2)
+- 8: Express.js (fieldId 2)
+- 9: Django (fieldId 2)
+- 10: Laravel (fieldId 2)
+- ... continue up to 50 topics across all fields
+
+### Levels (id, name)
+- 1: Intern
+- 2: Fresher
+- 3: Junior
+- 4: Middle
+- 5: Senior
+- 6: Lead
+- 7: Principal Engineer
+- 8: Architect
+
+### Question Types (id, name)
+- 1: Single Choice
+- 2: Multiple Choice
+- 3: Fill in the Blank
+
+---
+
+## Task Instructions
+
+Generate **12,000 unique interview questions** following these rules:
+
+### 1. Mandatory uniqueness
+- **ALL questions must be 100% unique in their `questionContent`.**  
+- **No two questions can have the same content**, even if they belong to different topics, levels, or types.  
+- Ensure content variety using realistic IT interview phrasing, examples, and context.  
+- Avoid placeholders like "Sample question"; generate meaningful, distinct questions.
+
+### 2. Question structure
+Each question must have:
+- `fieldId` → existing in DB
+- `topicId` → must belong to the correct `fieldId`
+- `levelId` → existing level
+- `questionTypeId` → existing type
+
+Every combination of **field × topic × level × questionType** must have **at least 10 unique questions**.
+
+### 3. Question type guidance
+
+id | Question Type         | Template Example                                                                 |
+---|-----------------------|---------------------------------------------------------------------------------|
+1  | Single Choice         | "Which of the following is true about [topic]?" Answer: "Option A is correct."  |
+2  | Multiple Choice       | "Select all correct statements about [topic]." Answer: "Options A, C, D are correct." |
+3  | Fill in the Blank      | "Explain how [topic] works in [context]." Answer: "Your detailed explanation." |
+
+---
+
+## 4. JSON Output Format
+
+```json
+{
+  "id": 1,
+  "userId": 1,
+  "topicId": 1,
+  "fieldId": 1,
+  "levelId": 2,
+  "questionTypeId": 1,
+  "questionContent": "Your unique question content here",
+  "questionAnswer": "Your unique answer content here",
+  "similarityScore": 0.0,
+  "status": "APPROVED",
+  "language": "en",
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "approvedAt": "2025-01-02T00:00:00.000Z",
+  "approvedBy": 1,
+  "usefulVote": 0,
+  "unusefulVote": 0,
+  "fieldName": "Frontend",
+  "topicName": "ReactJS",
+  "levelName": "Junior",
+  "questionTypeName": "Single Choice"
+}

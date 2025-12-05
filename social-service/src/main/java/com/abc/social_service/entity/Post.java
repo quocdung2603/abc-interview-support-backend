@@ -18,6 +18,16 @@ public class Post {
     private Long id;
     
     private Long userId;        // User who created the post
+    private Long fieldId;       // Reference to field/category
+    private Long topicId;       // Reference to topic
+    private Long levelId;       // Optional difficulty level
+    
+    @Column(length = 20, nullable = false)
+    private String postType = "DISCUSSION";  // DISCUSSION or QUESTION
+    
+    @Column(length = 20, nullable = false)
+    private String status = "DRAFT";  // DRAFT, PUBLISHED, or LOCKED
+    
     private String title;
     
     @Column(columnDefinition = "text")
@@ -31,6 +41,14 @@ public class Post {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        
+        // Set default values if not provided
+        if (postType == null || postType.isEmpty()) {
+            postType = "DISCUSSION";
+        }
+        if (status == null || status.isEmpty()) {
+            status = "DRAFT";
+        }
     }
     
     @PreUpdate

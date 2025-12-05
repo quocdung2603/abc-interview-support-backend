@@ -32,10 +32,39 @@ public class PostController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all posts with pagination")
+    @Operation(summary = "Get all posts with pagination and filtering", 
+               description = "Filter posts by field, topic, level, type, and status")
     public ResponseEntity<Page<PostResponse>> getAllPosts(
+            @RequestParam(required = false) Long fieldId,
+            @RequestParam(required = false) Long topicId,
+            @RequestParam(required = false) Long levelId,
+            @RequestParam(required = false) String postType,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        
+        // If any classification filter is provided, use filterPosts
+        if (fieldId != null || topicId != null || levelId != null) {
+            com.abc.social_service.dto.PostFilterRequest filterRequest = 
+                com.abc.social_service.dto.PostFilterRequest.builder()
+                    .fieldId(fieldId)
+                    .topicId(topicId)
+                    .levelId(levelId)
+                    .postType(postType)
+                    .status(status)
+                    .page(page)
+                    .size(size)
+                    .sortBy(sortBy)
+                    .sortDirection(sortDirection)
+                    .build();
+            
+            Page<PostResponse> posts = postService.filterPosts(filterRequest);
+            return ResponseEntity.ok(posts);
+        }
+        
+        // Otherwise use default getAllPosts
         Pageable pageable = PageRequest.of(page, size);
         Page<PostResponse> posts = postService.getAllPosts(pageable);
         return ResponseEntity.ok(posts);
@@ -72,5 +101,17 @@ public class PostController {
         LocalDateTime lockTime = LocalDateTime.parse(request.get("lockTime"));
         PostResponse response = postService.setLockTime(id, lockTime);
         return ResponseEntity.ok(response);
+    }
+    
+    @PutMapping("/{id}/approve")
+    @Operation(summary = "Approve a draft post (admin only)")
+    public ResponseEntity<PostResponse> approvePost(@PathVariable Long id) {
+        try {
+            PostResponse response = postService.approvePost(id);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null);
+        }
     }
 }

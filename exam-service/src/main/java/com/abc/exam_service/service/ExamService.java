@@ -150,20 +150,45 @@ public class ExamService {
         return userAnswerRepository.findByExamIdAndUserId(examId, userId, pageable).map(mappers::toResponse);
     }
 
+    @Transactional
     public ExamRegistrationResponse registerForExam(ExamRegistrationRequest req) {
         if (examRegistrationRepository.existsByExamIdAndUserId(req.getExamId(), req.getUserId())) {
             throw new RuntimeException("Already registered for this exam");
         }
+        
+        // Fetch the exam entity to establish the relationship
+        Exam exam = examRepository.findById(req.getExamId())
+                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + req.getExamId()));
+        
         ExamRegistration registration = mappers.toEntity(req);
+        registration.setExam(exam); // Set the exam relationship
         registration.setRegistrationStatus("REGISTERED");
         registration.setRegisteredAt(LocalDateTime.now());
-        return mappers.toResponse(examRegistrationRepository.save(registration));
+        
+        ExamRegistration saved = examRegistrationRepository.save(registration);
+        
+        // Force load exam to avoid LazyInitializationException when mapping
+        if (saved.getExam() != null) {
+            saved.getExam().getId();
+        }
+        
+        return mappers.toResponse(saved);
     }
 
+    @Transactional
     public ExamRegistrationResponse cancelRegistration(Long registrationId) {
-        ExamRegistration registration = examRegistrationRepository.findById(registrationId).orElseThrow();
+        ExamRegistration registration = examRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Registration not found with id: " + registrationId));
+        
         registration.setRegistrationStatus("CANCELLED");
-        return mappers.toResponse(examRegistrationRepository.save(registration));
+        ExamRegistration saved = examRegistrationRepository.save(registration);
+        
+        // Force load exam to avoid LazyInitializationException when mapping
+        if (saved.getExam() != null) {
+            saved.getExam().getId();
+        }
+        
+        return mappers.toResponse(saved);
     }
 
     public Page<ExamRegistrationResponse> listRegistrationsByExam(Long examId, Pageable pageable) {
@@ -316,8 +341,17 @@ public class ExamService {
         return mappers.toResponse(userAnswerRepository.findById(id).orElseThrow());
     }
 
+    @Transactional(readOnly = true)
     public ExamRegistrationResponse getRegistrationById(Long id) {
-        return mappers.toResponse(examRegistrationRepository.findById(id).orElseThrow());
+        ExamRegistration registration = examRegistrationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registration not found with id: " + id));
+        
+        // Force load exam to avoid LazyInitializationException when mapping
+        if (registration.getExam() != null) {
+            registration.getExam().getId();
+        }
+        
+        return mappers.toResponse(registration);
     }
 
     @Transactional
@@ -418,7 +452,7 @@ public class ExamService {
             
             log.info("Selected {} random questions from {} available", selectedQuestions.size(), questions.size());
             
-            // 2. Create exam with DRAFT status
+            // 2. Create exam - PRACTICE exams are auto-published
             Exam exam = new Exam();
             exam.setUserId(userId);
             exam.setTitle(req.getTitle());
@@ -427,7 +461,7 @@ public class ExamService {
             exam.setLanguage(req.getLanguage());
             exam.setQuestionCount(selectedQuestions.size());
             exam.setExamType("PRACTICE"); // User self-practice
-            exam.setStatus("DRAFT"); // Not published
+            exam.setStatus("PUBLISHED"); // PRACTICE exams are auto-published
             exam.setCreatedAt(LocalDateTime.now());
             exam.setCreatedBy(userId);
             

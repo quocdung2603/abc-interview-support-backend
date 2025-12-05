@@ -278,6 +278,8 @@ services:
       SERVER_SERVLET_ENCODING_CHARSET: UTF-8
       SERVER_SERVLET_ENCODING_FORCE: "true"
       JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
       CONFIG_SERVER_URI: http://config-service:8888
     networks:

@@ -112,6 +112,14 @@ public class UserController {
         return userService.getAllRoles();
     }
 
+    // Get user ELO rank (for internal service calls)
+    @GetMapping("/{userId}/elo")
+    public Map<String, Integer> getUserEloRank(@PathVariable Long userId) {
+        UserResponse user = userService.getById(userId);
+        Integer eloScore = user.getEloScore() != null ? user.getEloScore() : 1000;
+        return Map.of("eloRank", eloScore);
+    }
+
     // Elo History endpoints
     @GetMapping("/{userId}/elo-history")
     public Page<EloHistoryResponse> getEloHistory(

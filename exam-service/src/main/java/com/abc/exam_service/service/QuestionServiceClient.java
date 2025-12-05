@@ -62,23 +62,67 @@ public class QuestionServiceClient {
     }
     
     public QuestionDTO getQuestionById(Long questionId) {
-        try {
-            String url = QUESTION_SERVICE_URL + "/questions/" + questionId;
-            log.debug("Fetching question by ID: {}", url);
-            
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    Map.class
-            );
-            
-            Map<String, Object> questionData = response.getBody();
-            return mapToQuestionDTO(questionData);
-        } catch (Exception e) {
-            log.error("Error fetching question {}", questionId, e);
-            throw new RuntimeException("Failed to fetch question " + questionId, e);
+        return getQuestionByIdWithRetry(questionId, 3, 1000);
+    }
+    
+    /**
+     * Fetches a question by ID with retry logic and exponential backoff.
+     * 
+     * @param questionId the ID of the question to fetch
+     * @param maxAttempts maximum number of retry attempts (default: 3)
+     * @param initialDelayMs initial delay in milliseconds (default: 1000)
+     * @return QuestionDTO with question details including correct answer
+     * @throws RuntimeException if all retry attempts fail
+     */
+    public QuestionDTO getQuestionByIdWithRetry(Long questionId, int maxAttempts, long initialDelayMs) {
+        int attempt = 0;
+        long delay = initialDelayMs;
+        Exception lastException = null;
+        
+        while (attempt < maxAttempts) {
+            try {
+                String url = QUESTION_SERVICE_URL + "/questions/" + questionId;
+                log.debug("Fetching question by ID (attempt {}): {}", attempt + 1, url);
+                
+                ResponseEntity<Map> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        null,
+                        Map.class
+                );
+                
+                Map<String, Object> questionData = response.getBody();
+                QuestionDTO result = mapToQuestionDTO(questionData);
+                
+                if (attempt > 0) {
+                    log.info("Successfully fetched question {} after {} attempts", questionId, attempt + 1);
+                }
+                
+                return result;
+            } catch (Exception e) {
+                lastException = e;
+                attempt++;
+                
+                if (attempt < maxAttempts) {
+                    log.warn("Failed to fetch question {} (attempt {}), retrying in {}ms: {}", 
+                            questionId, attempt, delay, e.getMessage());
+                    
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interrupted while waiting to retry", ie);
+                    }
+                    
+                    // Exponential backoff: double the delay for next attempt
+                    delay *= 2;
+                } else {
+                    log.error("Failed to fetch question {} after {} attempts", questionId, maxAttempts, e);
+                }
+            }
         }
+        
+        throw new RuntimeException("Failed to fetch question " + questionId + " after " + maxAttempts + " attempts", lastException);
     }
     
     private QuestionDTO mapToQuestionDTO(Map<String, Object> map) {
@@ -199,5 +243,35 @@ public class QuestionServiceClient {
             log.error("Error calling question service search by IDs", e);
             throw new RuntimeException("Failed to search questions by IDs from question service", e);
         }
+    }
+    
+    /**
+     * Batch fetches multiple questions by their IDs.
+     * More efficient than individual calls when fetching many questions.
+     * 
+     * @param questionIds list of question IDs to fetch
+     * @return Map of questionId -> QuestionDTO
+     */
+    public Map<Long, QuestionDTO> getQuestionsWithAnswers(List<Long> questionIds) {
+        Map<Long, QuestionDTO> result = new HashMap<>();
+        
+        if (questionIds == null || questionIds.isEmpty()) {
+            return result;
+        }
+        
+        log.info("Batch fetching {} questions", questionIds.size());
+        
+        for (Long questionId : questionIds) {
+            try {
+                QuestionDTO question = getQuestionById(questionId);
+                result.put(questionId, question);
+            } catch (Exception e) {
+                log.error("Failed to fetch question {} in batch operation", questionId, e);
+                // Continue with other questions even if one fails
+            }
+        }
+        
+        log.info("Successfully fetched {}/{} questions", result.size(), questionIds.size());
+        return result;
     }
 }
