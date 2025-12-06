@@ -1,0 +1,5 @@
+﻿ source_table | source_column | target_table | target_column |       constraint_name       
+--------------+---------------+--------------+---------------+-----------------------------
+ users        | role_id       | roles        | id            | fkp56c1712k691lhsyewcssf40f
+(1 row)
+

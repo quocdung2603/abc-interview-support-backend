@@ -1,11 +1,9 @@
 package com.abc.question_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnswerResponse {
     private Long id;
     private Long userId;

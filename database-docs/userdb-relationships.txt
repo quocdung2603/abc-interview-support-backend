@@ -1,0 +1,6 @@
+﻿ source_table | source_column | target_table | target_column |       constraint_name       
+--------------+---------------+--------------+---------------+-----------------------------
+ elo_history  | user_id       | users        | id            | fklw2ymy6oaspi5vofqgxbywvvd
+ users        | role_id       | roles        | id            | fkp56c1712k691lhsyewcssf40f
+(2 rows)
+

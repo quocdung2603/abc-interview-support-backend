@@ -46,9 +46,16 @@ public interface Mappers {
     @Mapping(target = "question.id", source = "questionId")
     @Mapping(target = "questionType.id", source = "questionTypeId")
     Answer toEntity(AnswerRequest req);
+    
     @Mapping(target = "questionId", source = "question.id")
     @Mapping(target = "questionTypeId", source = "questionType.id")
     @Mapping(target = "answerContent", source = "content")
+    @Mapping(target = "isCorrect", source = "isCorrect")
+    @Mapping(target = "similarityScore", source = "similarityScore")
+    @Mapping(target = "isSampleAnswer", source = "isSampleAnswer")
+    @Mapping(target = "orderNumber", source = "orderNumber")
+    @Mapping(target = "usefulVote", source = "usefulVote")
+    @Mapping(target = "unusefulVote", source = "unusefulVote")
     AnswerResponse toResponse(Answer entity);
 }
 

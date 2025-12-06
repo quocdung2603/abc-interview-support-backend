@@ -166,14 +166,12 @@ public class QuestionGeneratorService {
         question.setLevel(level);
         question.setQuestionType(questionType);
         
-        // Generate content
-        String content = contentGenerator.generateQuestionContent(
-            field, topic, level, questionType, sequenceNumber
-        );
-        String answer = contentGenerator.generateQuestionAnswer(content, questionType);
+        // Generate content using the correct interface method
+        com.abc.question_service.dto.QuestionContent generatedContent = 
+            contentGenerator.generateQuestion(field, topic, level, questionType, java.util.Collections.emptySet());
         
-        question.setQuestionContent(content);
-        question.setQuestionAnswer(answer);
+        question.setQuestionContent(generatedContent.getQuestionText());
+        question.setQuestionAnswer(generatedContent.getAnswerText());
         
         // Set user fields
         question.setUserId(userId);

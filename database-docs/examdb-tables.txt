@@ -1,0 +1,6 @@
+﻿ exam_questions
+ exam_registrations
+ exams
+ results
+ user_answers
+

@@ -1,0 +1,8 @@
+﻿    source_table    | source_column | target_table | target_column |       constraint_name       
+--------------------+---------------+--------------+---------------+-----------------------------
+ exam_questions     | exam_id       | exams        | id            | fk5cd6sjmccb11rrwpyabyc81c0
+ exam_registrations | exam_id       | exams        | id            | fkohhjxlu7wyw1xdi33gjou4v0u
+ results            | exam_id       | exams        | id            | fkeow9kom5hrbhv6jhq82bqe68k
+ user_answers       | exam_id       | exams        | id            | fk9efuavaa7y69wswnxjubv0ss3
+(4 rows)
+

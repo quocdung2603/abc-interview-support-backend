@@ -1,0 +1,11 @@
+﻿ source_table |  source_column   |  target_table  | target_column |       constraint_name       
+--------------+------------------+----------------+---------------+-----------------------------
+ answers      | question_id      | questions      | id            | fk3erw1a3t0r78st8ty27x6v3g1
+ answers      | question_type_id | question_types | id            | fkrnxiox1ww7x1v60j6oagjxjm5
+ questions    | field_id         | fields         | id            | fk8pc495t80b42wtu5xyxeef89y
+ questions    | level_id         | levels         | id            | fkd1eetxmrbe1x2sjff43j4qyp0
+ questions    | question_type_id | question_types | id            | fkdyyji0ey6u2yifjdt8ybu3tyw
+ questions    | topic_id         | topics         | id            | fkdb5p6ukb0v76he4pq87cbymhg
+ topics       | field_id         | fields         | id            | fkpgw0524gmtqpj34k0qgd4jgi5
+(7 rows)
+

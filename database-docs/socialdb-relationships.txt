@@ -1,0 +1,4 @@
+﻿ source_table | source_column | target_table | target_column | constraint_name 
+--------------+---------------+--------------+---------------+-----------------
+(0 rows)
+
