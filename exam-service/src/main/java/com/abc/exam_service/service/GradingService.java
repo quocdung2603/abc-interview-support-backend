@@ -51,14 +51,23 @@ public class GradingService {
     
     /**
      * Validates that a user is registered for an exam.
+     * PRACTICE and VIRTUAL exams do not require registration.
+     * Only RECRUITER exams require registration.
      * 
-     * @param examId the exam ID
+     * @param exam the Exam entity
      * @param userId the user ID
-     * @throws InvalidRequestException if user is not registered
+     * @throws InvalidRequestException if user is not registered (for RECRUITER exams)
      */
-    private void validateRegistration(Long examId, Long userId) {
+    private void validateRegistration(Exam exam, Long userId) {
+        // Skip registration check for PRACTICE and VIRTUAL exams
+        // Only RECRUITER exams require registration
+        if (!"RECRUITER".equalsIgnoreCase(exam.getExamType())) {
+            log.info("Skipping registration validation for {} exam: {}", exam.getExamType(), exam.getId());
+            return;
+        }
+        
         boolean isRegistered = examRegistrationRepository
-                .existsByExamIdAndUserIdAndRegistrationStatus(examId, userId, "REGISTERED");
+                .existsByExamIdAndUserIdAndRegistrationStatus(exam.getId(), userId, "REGISTERED");
         
         if (!isRegistered) {
             throw new InvalidRequestException("User is not registered for this exam");
@@ -102,7 +111,7 @@ public class GradingService {
         
         // Step 1: Validate exam, registration, and question IDs
         Exam exam = validateExam(examId);
-        validateRegistration(examId, userId);
+        validateRegistration(exam, userId);
         
         List<Long> submittedQuestionIds = answers.stream()
                 .map(AnswerSubmission::getQuestionId)

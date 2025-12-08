@@ -1,0 +1,288 @@
+{
+  "info": {
+    "name": "PRACTICE Exam Type - Testing",
+    "description": "Test collection for PRACTICE exam type feature",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "practice_exam_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "virtual_exam_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth - Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const jsonData = pm.response.json();",
+              "    pm.environment.set('access_token', jsonData.accessToken);",
+              "    console.log('Login successful');",
+              "}"
+            ]
+          }
+        }
+      ]
+,
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "2. Create PRACTICE Exam (Auto-Published)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('practice_exam_id', jsonData.id);",
+              "    console.log('PRACTICE Exam ID:', jsonData.id);",
+              "    console.log('Status:', jsonData.status);",
+              "    pm.test('Status should be PUBLISHED', function() {",
+              "        pm.expect(jsonData.status).to.eql('PUBLISHED');",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"examType\": \"PRACTICE\",\n  \"title\": \"Java Programming Practice Test\",\n  \"position\": \"Software Engineer\",\n  \"fieldId\": 1,\n  \"topicIds\": [1, 2],\n  \"levelId\": 1,\n  \"questionTypeIds\": [1],\n  \"questionCount\": 10,\n  \"duration\": 60,\n  \"language\": \"en\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/exams",
+          "host": ["{{base_url}}"],
+          "path": ["exams"]
+        }
+      }
+    },
+    {
+      "name": "3. Create VIRTUAL Exam (Should be DRAFT)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('virtual_exam_id', jsonData.id);",
+              "    console.log('VIRTUAL Exam ID:', jsonData.id);",
+              "    console.log('Status:', jsonData.status);",
+              "    pm.test('Status should be DRAFT', function() {",
+              "        pm.expect(jsonData.status).to.eql('DRAFT');",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"examType\": \"VIRTUAL\",\n  \"title\": \"Java Programming Virtual Test\",\n  \"position\": \"Software Engineer\",\n  \"fieldId\": 1,\n  \"topicIds\": [1, 2],\n  \"levelId\": 1,\n  \"questionTypeIds\": [1],\n  \"questionCount\": 10,\n  \"duration\": 60,\n  \"language\": \"en\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/exams",
+          "host": ["{{base_url}}"],
+          "path": ["exams"]
+        }
+      }
+    },
+    {
+      "name": "4. Submit Answer to PRACTICE Exam (No Registration)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Answer submitted successfully', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "console.log('Answer submitted to PRACTICE exam without registration');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"examId\": {{practice_exam_id}},\n  \"userId\": 1,\n  \"questionId\": 1,\n  \"answerContent\": \"public class HelloWorld { public static void main(String[] args) { System.out.println(\\\"Hello World\\\"); } }\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/exams/answers",
+          "host": ["{{base_url}}"],
+          "path": ["exams", "answers"]
+        }
+      }
+    },
+    {
+      "name": "5. Submit Result to PRACTICE Exam (No Registration)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Result submitted successfully', function() {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "console.log('Result submitted to PRACTICE exam without registration');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"examId\": {{practice_exam_id}},\n  \"userId\": 1,\n  \"score\": 85.5,\n  \"passStatus\": true,\n  \"feedback\": \"Good performance on practice exam\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/exams/results",
+          "host": ["{{base_url}}"],
+          "path": ["exams", "results"]
+        }
+      }
+    },
+    {
+      "name": "6. Try Submit Answer to VIRTUAL Exam (Should Fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Should fail without registration', function() {",
+              "    pm.response.to.have.status(500);",
+              "});",
+              "console.log('Correctly rejected - registration required for VIRTUAL exam');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"examId\": {{virtual_exam_id}},\n  \"userId\": 1,\n  \"questionId\": 1,\n  \"answerContent\": \"Test answer\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/exams/answers",
+          "host": ["{{base_url}}"],
+          "path": ["exams", "answers"]
+        }
+      }
+    },
+    {
+      "name": "7. Get PRACTICE Exam Details",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/exams/{{practice_exam_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["exams", "{{practice_exam_id}}"]
+        }
+      }
+    },
+    {
+      "name": "8. Get All PRACTICE Exams",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/exams/type?type=PRACTICE&page=0&size=10",
+          "host": ["{{base_url}}"],
+          "path": ["exams", "type"],
+          "query": [
+            {
+              "key": "type",
+              "value": "PRACTICE"
+            },
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -21,6 +21,11 @@
                          "key":  "base_url",
                          "value":  "http://localhost:8080",
                          "type":  "string"
+                     },
+                     {
+                         "key":  "gateway_url",
+                         "value":  "http://localhost:8080",
+                         "type":  "string"
                      }
                  ],
     "item":  [
@@ -36,10 +41,10 @@
                                                                        "exec":  [
                                                                                     "if (pm.response.code === 201) {",
                                                                                     "    const jsonData = pm.response.json();",
-                                                                                    "    pm.environment.set(\u0027access_token\u0027, jsonData.accessToken);",
-                                                                                    "    pm.environment.set(\u0027refresh_token\u0027, jsonData.refreshToken);",
-                                                                                    "    pm.environment.set(\u0027verify_token\u0027, jsonData.verifyToken);",
-                                                                                    "    console.log(\u0027âœ… Registration successful\u0027);",
+                                                                                    "    pm.environment.set('access_token', jsonData.accessToken);",
+                                                                                    "    pm.environment.set('refresh_token', jsonData.refreshToken);",
+                                                                                    "    pm.environment.set('verify_token', jsonData.verifyToken);",
+                                                                                    "    console.log('âœ… Registration successful');",
                                                                                     "}"
                                                                                 ]
                                                                    }
@@ -81,9 +86,9 @@
                                                                        "exec":  [
                                                                                     "if (pm.response.code === 200) {",
                                                                                     "    const jsonData = pm.response.json();",
-                                                                                    "    pm.environment.set(\u0027access_token\u0027, jsonData.accessToken);",
-                                                                                    "    pm.environment.set(\u0027refresh_token\u0027, jsonData.refreshToken);",
-                                                                                    "    console.log(\u0027âœ… Login successful\u0027);",
+                                                                                    "    pm.environment.set('access_token', jsonData.accessToken);",
+                                                                                    "    pm.environment.set('refresh_token', jsonData.refreshToken);",
+                                                                                    "    console.log('âœ… Login successful');",
                                                                                     "}"
                                                                                 ]
                                                                    }
@@ -125,9 +130,9 @@
                                                                        "exec":  [
                                                                                     "if (pm.response.code === 200) {",
                                                                                     "    const jsonData = pm.response.json();",
-                                                                                    "    pm.environment.set(\u0027access_token\u0027, jsonData.accessToken);",
-                                                                                    "    pm.environment.set(\u0027refresh_token\u0027, jsonData.refreshToken);",
-                                                                                    "    console.log(\u0027âœ… Account verified\u0027);",
+                                                                                    "    pm.environment.set('access_token', jsonData.accessToken);",
+                                                                                    "    pm.environment.set('refresh_token', jsonData.refreshToken);",
+                                                                                    "    console.log('âœ… Account verified');",
                                                                                     "}"
                                                                                 ]
                                                                    }
@@ -165,8 +170,8 @@
                                                                        "exec":  [
                                                                                     "if (pm.response.code === 200) {",
                                                                                     "    const jsonData = pm.response.json();",
-                                                                                    "    pm.environment.set(\u0027access_token\u0027, jsonData.accessToken);",
-                                                                                    "    console.log(\u0027âœ… Token refreshed\u0027);",
+                                                                                    "    pm.environment.set('access_token', jsonData.accessToken);",
+                                                                                    "    console.log('âœ… Token refreshed');",
                                                                                     "}"
                                                                                 ]
                                                                    }
@@ -260,7 +265,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/users?page=0\u0026size=20",
+                                                                  "raw":  "{{base_url}}/users?page=0&size=20",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -285,7 +290,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/users/role/1?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/users/role/1?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -312,7 +317,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/users/status/ACTIVE?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/users/status/ACTIVE?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -524,7 +529,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/users/1/elo-history?page=0\u0026size=10",
+                                                                                   "raw":  "{{base_url}}/users/1/elo-history?page=0&size=10",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -611,7 +616,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/fields?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/fields?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -735,7 +740,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/topics?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/topics?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -859,7 +864,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/levels?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/levels?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -983,7 +988,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/question-types?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/question-types?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -1107,7 +1112,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -1154,7 +1159,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/topics/1/questions?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/topics/1/questions?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -1303,7 +1308,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/answers?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/answers?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -1352,7 +1357,7 @@
                                                                                 },
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/questions/1/answers?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/questions/1/answers?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -1502,7 +1507,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/exams?page=0\u0026size=20",
+                                                                  "raw":  "{{base_url}}/exams?page=0&size=20",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -1546,7 +1551,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/exams/user/1?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/exams/user/1?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -1576,7 +1581,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/exams/type?type=VIRTUAL\u0026page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/exams/type?type=VIRTUAL&page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -1782,12 +1787,12 @@
                                                                                         "exec":  [
                                                                                                      "if (pm.response.code === 200) {",
                                                                                                      "    const jsonData = pm.response.json();",
-                                                                                                     "    pm.environment.set(\u0027exam_id\u0027, jsonData.examId);",
-                                                                                                     "    console.log(\u0027âœ… Exam created with \u0027 + jsonData.questionCount + \u0027 random questions\u0027);",
-                                                                                                     "    console.log(\u0027   Exam ID: \u0027 + jsonData.examId);",
-                                                                                                     "    console.log(\u0027   Status: \u0027 + jsonData.status + \u0027 (DRAFT - for practice)\u0027);",
-                                                                                                     "    console.log(\u0027   Question IDs: \u0027 + jsonData.questionIds.join(\u0027, \u0027));",
-                                                                                                     "    console.log(\u0027   âœ… Numeric IDs stored: fieldId, topicId, levelId\u0027);",
+                                                                                                     "    pm.environment.set('exam_id', jsonData.examId);",
+                                                                                                     "    console.log('âœ… Exam created with ' + jsonData.questionCount + ' random questions');",
+                                                                                                     "    console.log('   Exam ID: ' + jsonData.examId);",
+                                                                                                     "    console.log('   Status: ' + jsonData.status + ' (DRAFT - for practice)');",
+                                                                                                     "    console.log('   Question IDs: ' + jsonData.questionIds.join(', '));",
+                                                                                                     "    console.log('   âœ… Numeric IDs stored: fieldId, topicId, levelId');",
                                                                                                      "}"
                                                                                                  ]
                                                                                     }
@@ -1819,7 +1824,7 @@
                                                                                                 "with-random-questions"
                                                                                             ]
                                                                                },
-                                                                       "description":  "âœ… FIXED: Create exam with random questions using numeric IDs.\n\n**What\u0027s Fixed:**\n- Uses fieldId, topicIds, levelId (numeric) instead of text strings\n- Stores numeric IDs in database (field_id, topic_id, level_id columns)\n- No more Unicode encoding errors with Vietnamese characters\n\n**Response Format:**\n```json\n{\n  \"examId\": 57,\n  \"title\": \"ReactJS Junior Practice Exam\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 2],\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"fieldId\": 1,\n      \"topicIds\": [3],\n      \"levelId\": 1,\n      \"questionTypeId\": 1,\n      \"field\": \"Láº­p trÃ¬nh viÃªn\",\n      \"topics\": [\"ReactJS\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Multiple Choice\",\n      \"questionText\": \"What is React?\",\n      \"questionAnswer\": \"A JavaScript library...\"\n    }\n  ]\n}\n```\n\n**Note:** Response includes both numeric IDs (for queries) and text names (for display)"
+                                                                       "description":  "âœ… FIXED: Create exam with random questions using numeric IDs.\n\n**What's Fixed:**\n- Uses fieldId, topicIds, levelId (numeric) instead of text strings\n- Stores numeric IDs in database (field_id, topic_id, level_id columns)\n- No more Unicode encoding errors with Vietnamese characters\n\n**Response Format:**\n```json\n{\n  \"examId\": 57,\n  \"title\": \"ReactJS Junior Practice Exam\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 2],\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"fieldId\": 1,\n      \"topicIds\": [3],\n      \"levelId\": 1,\n      \"questionTypeId\": 1,\n      \"field\": \"Láº­p trÃ¬nh viÃªn\",\n      \"topics\": [\"ReactJS\"],\n      \"level\": \"Junior\",\n      \"questionType\": \"Multiple Choice\",\n      \"questionText\": \"What is React?\",\n      \"questionAnswer\": \"A JavaScript library...\"\n    }\n  ]\n}\n```\n\n**Note:** Response includes both numeric IDs (for queries) and text names (for display)"
                                                                    }
                                                    },
                                                    {
@@ -1954,11 +1959,11 @@
                                                                                                 "with-random-questions"
                                                                                             ]
                                                                                },
-                                                                       "description":  "This should return 400 error: \u0027No questions found matching the criteria\u0027"
+                                                                       "description":  "This should return 400 error: 'No questions found matching the criteria'"
                                                                    }
                                                    }
                                                ],
-                                      "description":  "ðŸŽ¯ **UPDATED**: Create exam with random questions using NUMERIC IDs (Fixed Unicode encoding issues)\n\n**Key Features**:\n- âœ… Status: DRAFT (not published, for self-practice)\n- âœ… Type: PRACTICE (self-study)\n- âœ… Permission: USER, ADMIN, or RECRUITER\n- âœ… Auto-selects and shuffles questions\n- âœ… Uses numeric IDs instead of text strings\n- âœ… Solves Vietnamese character encoding issues\n\n**Available Data in Database**:\n- **Fields**: 1=Láº­p trÃ¬nh viÃªn, 2=Tester, 3=Business Analyst, 4=DevOps, 5=Data Science\n- **Topics**: 1=Spring Boot, 3=ReactJS, 4=VueJS, 5=Automated Testing\n- **Levels**: 1=Fresher, 2=Junior, 3=Middle, 4=Senior\n- **Types**: 1=Multiple Choice, 2=Open Ended\n\n**Request Body Schema (UPDATED)**:\n```json\n{\n  \"title\": \"string (required, max 200 chars)\",\n  \"position\": \"string (optional)\",\n  \"duration\": \"integer (required, min 1 minute)\",\n  \"language\": \"string (required, e.g. \u0027vi\u0027, \u0027en\u0027)\",\n  \"fieldId\": \"integer (optional, numeric ID)\",\n  \"topicIds\": [\"array of integers (optional, numeric IDs)\"],\n  \"levelId\": \"integer (optional, numeric ID)\",\n  \"questionTypeId\": \"integer (optional, numeric ID)\",\n  \"numberOfQuestions\": \"integer (required, 1-100)\"\n}\n```\n\n**Response Schema**:\n```json\n{\n  \"examId\": 1,\n  \"title\": \"ReactJS Practice\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 3],\n  \"questions\": []\n}\n```"
+                                      "description":  "ðŸŽ¯ **UPDATED**: Create exam with random questions using NUMERIC IDs (Fixed Unicode encoding issues)\n\n**Key Features**:\n- âœ… Status: DRAFT (not published, for self-practice)\n- âœ… Type: PRACTICE (self-study)\n- âœ… Permission: USER, ADMIN, or RECRUITER\n- âœ… Auto-selects and shuffles questions\n- âœ… Uses numeric IDs instead of text strings\n- âœ… Solves Vietnamese character encoding issues\n\n**Available Data in Database**:\n- **Fields**: 1=Láº­p trÃ¬nh viÃªn, 2=Tester, 3=Business Analyst, 4=DevOps, 5=Data Science\n- **Topics**: 1=Spring Boot, 3=ReactJS, 4=VueJS, 5=Automated Testing\n- **Levels**: 1=Fresher, 2=Junior, 3=Middle, 4=Senior\n- **Types**: 1=Multiple Choice, 2=Open Ended\n\n**Request Body Schema (UPDATED)**:\n```json\n{\n  \"title\": \"string (required, max 200 chars)\",\n  \"position\": \"string (optional)\",\n  \"duration\": \"integer (required, min 1 minute)\",\n  \"language\": \"string (required, e.g. 'vi', 'en')\",\n  \"fieldId\": \"integer (optional, numeric ID)\",\n  \"topicIds\": [\"array of integers (optional, numeric IDs)\"],\n  \"levelId\": \"integer (optional, numeric ID)\",\n  \"questionTypeId\": \"integer (optional, numeric ID)\",\n  \"numberOfQuestions\": \"integer (required, 1-100)\"\n}\n```\n\n**Response Schema**:\n```json\n{\n  \"examId\": 1,\n  \"title\": \"ReactJS Practice\",\n  \"status\": \"DRAFT\",\n  \"duration\": 60,\n  \"questionCount\": 2,\n  \"questionIds\": [1, 3],\n  \"questions\": []\n}\n```"
                                   },
                                   {
                                       "name":  "ðŸ§ª Test: Vietnamese Characters (Numeric IDs Fix)",
@@ -2062,7 +2067,7 @@
                                                        "request":  {
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/exams/1/registrations?page=0\u0026size=10",
+                                                                                   "raw":  "{{base_url}}/exams/1/registrations?page=0&size=10",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -2089,7 +2094,7 @@
                                                        "request":  {
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/exams/registrations/user/1?page=0\u0026size=10",
+                                                                                   "raw":  "{{base_url}}/exams/registrations/user/1?page=0&size=10",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -2183,7 +2188,7 @@
                                                        "request":  {
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/exams/1/results?page=0\u0026size=10",
+                                                                                   "raw":  "{{base_url}}/exams/1/results?page=0&size=10",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -2210,7 +2215,7 @@
                                                        "request":  {
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/exams/results/user/1?page=0\u0026size=10",
+                                                                                   "raw":  "{{base_url}}/exams/results/user/1?page=0&size=10",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -2286,7 +2291,7 @@
                                                        "request":  {
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/exams/1/answers/1?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/exams/1/answers/1?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -2312,7 +2317,7 @@
                                                ]
                                   },
                                   {
-                                      "name":  "ðŸŽ¯ Exam Grading (Auto-Score \u0026 History)",
+                                      "name":  "ðŸŽ¯ Exam Grading (Auto-Score & History)",
                                       "item":  [
                                                    {
                                                        "name":  "Submit Exam Answers (Gateway)",
@@ -2321,24 +2326,24 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 200\u0027, function () {",
+                                                                                                     "pm.test('Status code is 200', function () {",
                                                                                                      "    pm.response.to.have.status(200);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Response has required fields\u0027, function () {",
+                                                                                                     "pm.test('Response has required fields', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027examId\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027userId\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027score\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027passStatus\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027totalQuestions\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027correctAnswers\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027details\u0027);",
+                                                                                                     "    pm.expect(jsonData).to.have.property('examId');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('userId');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('score');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('passStatus');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('totalQuestions');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('correctAnswers');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('details');",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Score is calculated correctly\u0027, function () {",
+                                                                                                     "pm.test('Score is calculated correctly', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.score).to.be.a(\u0027number\u0027);",
+                                                                                                     "    pm.expect(jsonData.score).to.be.a('number');",
                                                                                                      "    pm.expect(jsonData.score).to.be.at.least(0);",
                                                                                                      "    pm.expect(jsonData.score).to.be.at.most(100);",
                                                                                                      "});"
@@ -2387,13 +2392,13 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 200\u0027, function () {",
+                                                                                                     "pm.test('Status code is 200', function () {",
                                                                                                      "    pm.response.to.have.status(200);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Grading details are present\u0027, function () {",
+                                                                                                     "pm.test('Grading details are present', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.details).to.be.an(\u0027array\u0027);",
+                                                                                                     "    pm.expect(jsonData.details).to.be.an('array');",
                                                                                                      "    pm.expect(jsonData.details.length).to.be.greaterThan(0);",
                                                                                                      "});"
                                                                                                  ],
@@ -2414,10 +2419,8 @@
                                                                                     "raw":  "{\n  \"userId\": 3,\n  \"answers\": [\n    {\n      \"questionId\": 2,\n      \"answerContent\": \"Virtual DOM is a JavaScript representation of the real DOM. React creates a virtual copy of the DOM, makes changes to it, and then efficiently updates the real DOM only where changes occurred, improving performance.\"\n    },\n    {\n      \"questionId\": 3,\n      \"answerContent\": \"useState is a Hook that lets you add state to functional components\"\n    }\n  ]\n}"
                                                                                 },
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/submit",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/submit",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
@@ -2437,16 +2440,16 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 200\u0027, function () {",
+                                                                                                     "pm.test('Status code is 200', function () {",
                                                                                                      "    pm.response.to.have.status(200);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027History contains exam info\u0027, function () {",
+                                                                                                     "pm.test('History contains exam info', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027examId\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027userId\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027examTitle\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027answers\u0027);",
+                                                                                                     "    pm.expect(jsonData).to.have.property('examId');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('userId');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('examTitle');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('answers');",
                                                                                                      "});"
                                                                                                  ],
                                                                                         "type":  "text/javascript"
@@ -2459,10 +2462,8 @@
 
                                                                                   ],
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/history?userId={{userId}}",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/history?userId={{userId}}",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
@@ -2488,15 +2489,15 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 200\u0027, function () {",
+                                                                                                     "pm.test('Status code is 200', function () {",
                                                                                                      "    pm.response.to.have.status(200);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Result contains score and pass status\u0027, function () {",
+                                                                                                     "pm.test('Result contains score and pass status', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027score\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027passStatus\u0027);",
-                                                                                                     "    pm.expect(jsonData).to.have.property(\u0027completedAt\u0027);",
+                                                                                                     "    pm.expect(jsonData).to.have.property('score');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('passStatus');",
+                                                                                                     "    pm.expect(jsonData).to.have.property('completedAt');",
                                                                                                      "});"
                                                                                                  ],
                                                                                         "type":  "text/javascript"
@@ -2509,10 +2510,8 @@
 
                                                                                   ],
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/results/{{userId}}",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/results/{{userId}}",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
@@ -2533,13 +2532,13 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 400\u0027, function () {",
+                                                                                                     "pm.test('Status code is 400', function () {",
                                                                                                      "    pm.response.to.have.status(400);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Error message mentions exam status\u0027, function () {",
+                                                                                                     "pm.test('Error message mentions exam status', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include(\u0027status\u0027);",
+                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include('status');",
                                                                                                      "});"
                                                                                                  ],
                                                                                         "type":  "text/javascript"
@@ -2559,10 +2558,8 @@
                                                                                     "raw":  "{\n  \"userId\": 3,\n  \"answers\": [\n    {\n      \"questionId\": 1,\n      \"answerContent\": \"Test answer\"\n    }\n  ]\n}"
                                                                                 },
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{draft_exam_id}}/submit",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{draft_exam_id}}/submit",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{draft_exam_id}}",
@@ -2582,13 +2579,13 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 400 or 403\u0027, function () {",
+                                                                                                     "pm.test('Status code is 400 or 403', function () {",
                                                                                                      "    pm.expect(pm.response.code).to.be.oneOf([400, 403]);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Error message mentions registration\u0027, function () {",
+                                                                                                     "pm.test('Error message mentions registration', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include(\u0027registered\u0027);",
+                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include('registered');",
                                                                                                      "});"
                                                                                                  ],
                                                                                         "type":  "text/javascript"
@@ -2608,10 +2605,8 @@
                                                                                     "raw":  "{\n  \"userId\": 999,\n  \"answers\": [\n    {\n      \"questionId\": 1,\n      \"answerContent\": \"Test answer\"\n    }\n  ]\n}"
                                                                                 },
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/submit",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/submit",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
@@ -2631,13 +2626,13 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 400\u0027, function () {",
+                                                                                                     "pm.test('Status code is 400', function () {",
                                                                                                      "    pm.response.to.have.status(400);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Error message mentions invalid questions\u0027, function () {",
+                                                                                                     "pm.test('Error message mentions invalid questions', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include(\u0027question\u0027);",
+                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include('question');",
                                                                                                      "});"
                                                                                                  ],
                                                                                         "type":  "text/javascript"
@@ -2657,17 +2652,15 @@
                                                                                     "raw":  "{\n  \"userId\": 3,\n  \"answers\": [\n    {\n      \"questionId\": 999,\n      \"answerContent\": \"Test answer\"\n    },\n    {\n      \"questionId\": 888,\n      \"answerContent\": \"Another test answer\"\n    }\n  ]\n}"
                                                                                 },
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/submit",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/submit",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
                                                                                                 "submit"
                                                                                             ]
                                                                                },
-                                                                       "description":  "Error case: Submit answers with question IDs that don\u0027t belong to the exam"
+                                                                       "description":  "Error case: Submit answers with question IDs that don't belong to the exam"
                                                                    },
                                                        "response":  [
 
@@ -2680,13 +2673,13 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 200\u0027, function () {",
+                                                                                                     "pm.test('Status code is 200', function () {",
                                                                                                      "    pm.response.to.have.status(200);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Answers array is empty\u0027, function () {",
+                                                                                                     "pm.test('Answers array is empty', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.answers).to.be.an(\u0027array\u0027);",
+                                                                                                     "    pm.expect(jsonData.answers).to.be.an('array');",
                                                                                                      "    pm.expect(jsonData.answers).to.have.lengthOf(0);",
                                                                                                      "});"
                                                                                                  ],
@@ -2700,10 +2693,8 @@
 
                                                                                   ],
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/history?userId=999",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/history?userId=999",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
@@ -2716,7 +2707,7 @@
                                                                                                  }
                                                                                              ]
                                                                                },
-                                                                       "description":  "Get history for user who hasn\u0027t submitted (should return empty history)"
+                                                                       "description":  "Get history for user who hasn't submitted (should return empty history)"
                                                                    },
                                                        "response":  [
 
@@ -2729,13 +2720,13 @@
                                                                          "listen":  "test",
                                                                          "script":  {
                                                                                         "exec":  [
-                                                                                                     "pm.test(\u0027Status code is 404\u0027, function () {",
+                                                                                                     "pm.test('Status code is 404', function () {",
                                                                                                      "    pm.response.to.have.status(404);",
                                                                                                      "});",
                                                                                                      "",
-                                                                                                     "pm.test(\u0027Error message mentions no result\u0027, function () {",
+                                                                                                     "pm.test('Error message mentions no result', function () {",
                                                                                                      "    var jsonData = pm.response.json();",
-                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include(\u0027result\u0027);",
+                                                                                                     "    pm.expect(jsonData.detail || jsonData.message).to.include('result');",
                                                                                                      "});"
                                                                                                  ],
                                                                                         "type":  "text/javascript"
@@ -2748,10 +2739,8 @@
 
                                                                                   ],
                                                                        "url":  {
-                                                                                   "raw":  "{{exam_service_url}}/exams/{{examId}}/results/999",
-                                                                                   "host":  [
-                                                                                                "{{exam_service_url}}"
-                                                                                            ],
+                                                                                   "raw":  "{{gateway_url}}/exams/{{examId}}/results/999",
+                                                                                   "host": ["{{gateway_url}}"],
                                                                                    "path":  [
                                                                                                 "exams",
                                                                                                 "{{examId}}",
@@ -2759,7 +2748,7 @@
                                                                                                 "999"
                                                                                             ]
                                                                                },
-                                                                       "description":  "Get result for user who hasn\u0027t completed exam (should return 404)"
+                                                                       "description":  "Get result for user who hasn't completed exam (should return 404)"
                                                                    },
                                                        "response":  [
 
@@ -2799,7 +2788,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news?page=0\u0026size=20",
+                                                                  "raw":  "{{base_url}}/news?page=0&size=20",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -2846,7 +2835,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news/type?type=NEWS\u0026page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/news/type?type=NEWS&page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -2876,7 +2865,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news/user/1?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/news/user/1?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -2903,7 +2892,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news/status/APPROVED?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/news/status/APPROVED?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -2933,7 +2922,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news/field/1?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/news/field/1?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -2963,7 +2952,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news/published/NEWS?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/news/published/NEWS?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -2990,7 +2979,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/news/moderation/pending?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/news/moderation/pending?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -3178,7 +3167,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/recruitments?page=0\u0026size=20",
+                                                                  "raw":  "{{base_url}}/recruitments?page=0&size=20",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -3206,7 +3195,7 @@
                                                                },
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/recruitments/company/TechCorp?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/recruitments/company/TechCorp?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -3279,7 +3268,7 @@
                                       "request":  {
                                                       "method":  "GET",
                                                       "url":  {
-                                                                  "raw":  "{{base_url}}/career/preferences/1?page=0\u0026size=10",
+                                                                  "raw":  "{{base_url}}/career/preferences/1?page=0&size=10",
                                                                   "host":  [
                                                                                "{{base_url}}"
                                                                            ],
@@ -3391,7 +3380,7 @@
                                                                                },
                                                                        "method":  "POST",
                                                                        "body":  {
-                                                                                    "raw":  "{\r\n  \"fieldId\": 1,\r\n  \"topicId\": 3,\r\n  \"levelId\": 1,\r\n  \"postType\": \"DISCUSSION\",\r\n  \"title\": \"Best practices for React Hooks?\",\r\n  \"content\": \"I\u0027m learning React Hooks and wondering what are the best practices for using useState and useEffect. Any tips?\",\r\n  \"lockTime\": null\r\n}",
+                                                                                    "raw":  "{\r\n  \"fieldId\": 1,\r\n  \"topicId\": 3,\r\n  \"levelId\": 1,\r\n  \"postType\": \"DISCUSSION\",\r\n  \"title\": \"Best practices for React Hooks?\",\r\n  \"content\": \"I'm learning React Hooks and wondering what are the best practices for using useState and useEffect. Any tips?\",\r\n  \"lockTime\": null\r\n}",
                                                                                     "mode":  "raw"
                                                                                 },
                                                                        "header":  [
@@ -3448,7 +3437,7 @@
                                                        "request":  {
                                                                        "method":  "GET",
                                                                        "url":  {
-                                                                                   "raw":  "{{base_url}}/posts?page=0\u0026size=20",
+                                                                                   "raw":  "{{base_url}}/posts?page=0&size=20",
                                                                                    "host":  [
                                                                                                 "{{base_url}}"
                                                                                             ],
@@ -3487,7 +3476,7 @@
                                                ]
                                   },
                                   {
-                                      "name":  "Comments \u0026 Voting",
+                                      "name":  "Comments & Voting",
                                       "item":  [
                                                    {
                                                        "name":  "Create Comment",
@@ -3533,7 +3522,7 @@
                                                                    }
                                                    },
                                                    {
-                                                       "name":  "Vote on Comment",
+                                                       "name":  "Vote on Comment (USEFUL)",
                                                        "request":  {
                                                                        "method":  "POST",
                                                                        "header":  [
@@ -3544,7 +3533,7 @@
                                                                                   ],
                                                                        "body":  {
                                                                                     "mode":  "raw",
-                                                                                    "raw":  "{\n  \"userId\": 3\n}"
+                                                                                    "raw":  "{\n  \"userId\": 3,\n  \"voteType\": \"USEFUL\"\n}"
                                                                                 },
                                                                        "url":  {
                                                                                    "raw":  "{{base_url}}/comments/1/vote",
@@ -3556,7 +3545,64 @@
                                                                                                 "1",
                                                                                                 "vote"
                                                                                             ]
-                                                                               }
+                                                                               },
+                                                                       "description":  "Vote a comment as USEFUL. This increases the comment's vote score."
+                                                                   }
+                                                   },
+                                                   {
+                                                       "name":  "Vote on Comment (NOT_USEFUL)",
+                                                       "request":  {
+                                                                       "method":  "POST",
+                                                                       "header":  [
+                                                                                      {
+                                                                                          "key":  "Content-Type",
+                                                                                          "value":  "application/json"
+                                                                                      }
+                                                                                  ],
+                                                                       "body":  {
+                                                                                    "mode":  "raw",
+                                                                                    "raw":  "{\n  \"userId\": 3,\n  \"voteType\": \"NOT_USEFUL\"\n}"
+                                                                                },
+                                                                       "url":  {
+                                                                                   "raw":  "{{base_url}}/comments/1/vote",
+                                                                                   "host":  [
+                                                                                                "{{base_url}}"
+                                                                                            ],
+                                                                                   "path":  [
+                                                                                                "comments",
+                                                                                                "1",
+                                                                                                "vote"
+                                                                                            ]
+                                                                               },
+                                                                       "description":  "Vote a comment as NOT_USEFUL. This decreases the comment's vote score."
+                                                                   }
+                                                   },
+                                                   {
+                                                       "name":  "Vote on Comment (Using useful flag)",
+                                                       "request":  {
+                                                                       "method":  "POST",
+                                                                       "header":  [
+                                                                                      {
+                                                                                          "key":  "Content-Type",
+                                                                                          "value":  "application/json"
+                                                                                      }
+                                                                                  ],
+                                                                       "body":  {
+                                                                                    "mode":  "raw",
+                                                                                    "raw":  "{\n  \"userId\": 3,\n  \"useful\": true\n}"
+                                                                                },
+                                                                       "url":  {
+                                                                                   "raw":  "{{base_url}}/comments/1/vote",
+                                                                                   "host":  [
+                                                                                                "{{base_url}}"
+                                                                                            ],
+                                                                                   "path":  [
+                                                                                                "comments",
+                                                                                                "1",
+                                                                                                "vote"
+                                                                                            ]
+                                                                               },
+                                                                       "description":  "Alternative way to vote using 'useful' boolean flag instead of voteType string."
                                                                    }
                                                    }
                                                ]

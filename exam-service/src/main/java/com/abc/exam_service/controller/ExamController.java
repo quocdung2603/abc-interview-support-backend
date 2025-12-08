@@ -29,7 +29,10 @@ public class ExamController {
 
     @PostMapping("/{examId}/start")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ExamResponse startExam(@PathVariable Long examId) {
+    public ExamResponse startExam(@PathVariable Long examId, @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId != null) {
+            return examService.startExamWithUser(examId, userId);
+        }
         return examService.startExam(examId);
     }
 
@@ -142,7 +145,10 @@ public class ExamController {
 
 
     @GetMapping("/{id:[0-9]+}")
-    public ExamResponse getExamById(@PathVariable Long id) {
+    public ExamResponse getExamById(@PathVariable Long id, @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId != null) {
+            return examService.getExamByIdWithUser(id, userId);
+        }
         return examService.getExamById(id);
     }
 

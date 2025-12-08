@@ -17,7 +17,7 @@ public class Exam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long userId;
-    private String examType; // VIRTUAL, RECRUITER
+    private String examType; // VIRTUAL, RECRUITER, PRACTICE
     private String title;
     private String position;
     
@@ -36,3 +36,4 @@ public class Exam {
     private LocalDateTime createdAt;
     private Long createdBy;
 }
+

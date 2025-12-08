@@ -57,7 +57,15 @@ public class ExamService {
         exam.setLevelId(req.getLevelId());
         // topicIds and questionTypeIds are already set by mapper
         
-        exam.setStatus("DRAFT");
+        // Set status based on exam type
+        // PRACTICE exams are auto-published, others start as DRAFT
+        if ("PRACTICE".equalsIgnoreCase(req.getExamType())) {
+            exam.setStatus("PUBLISHED");
+            log.info("Auto-publishing PRACTICE exam: {}", req.getTitle());
+        } else {
+            exam.setStatus("DRAFT");
+        }
+        
         exam.setCreatedAt(LocalDateTime.now());
         exam.setCreatedBy(req.getUserId());
         return mappers.toResponse(examRepository.save(exam));
@@ -71,6 +79,20 @@ public class ExamService {
 
     public ExamResponse startExam(Long examId) {
         Exam exam = examRepository.findById(examId).orElseThrow();
+        exam.setStatus("ONGOING");
+        return mappers.toResponse(examRepository.save(exam));
+    }
+    
+    public ExamResponse startExamWithUser(Long examId, Long userId) {
+        // Fetch exam to check type
+        Exam exam = examRepository.findById(examId)
+            .orElseThrow(() -> new RuntimeException("Exam not found with id: " + examId));
+        
+        // Validate registration only for non-PRACTICE exams
+        if (requiresRegistration(exam.getExamType())) {
+            validateRegistration(examId, userId);
+        }
+        
         exam.setStatus("ONGOING");
         return mappers.toResponse(examRepository.save(exam));
     }
@@ -129,18 +151,34 @@ public class ExamService {
     }
 
     public ResultResponse submitResult(ResultRequest req) {
+        // Fetch exam to check type
+        Exam exam = examRepository.findById(req.getExamId())
+            .orElseThrow(() -> new RuntimeException("Exam not found with id: " + req.getExamId()));
+        
+        // Validate registration only for non-PRACTICE exams
+        if (requiresRegistration(exam.getExamType())) {
+            validateRegistration(req.getExamId(), req.getUserId());
+        }
+        
+        // Save result
         Result result = mappers.toEntity(req);
-        // Link to Exam entity to enable queries like findByExamId
-        Exam exam = examRepository.findById(req.getExamId()).orElseThrow();
         result.setExam(exam);
         result.setCompletedAt(LocalDateTime.now());
         return mappers.toResponse(resultRepository.save(result));
     }
 
     public UserAnswerResponse submitAnswer(UserAnswerRequest req) {
+        // Fetch exam to check type
+        Exam exam = examRepository.findById(req.getExamId())
+            .orElseThrow(() -> new RuntimeException("Exam not found with id: " + req.getExamId()));
+        
+        // Validate registration only for non-PRACTICE exams
+        if (requiresRegistration(exam.getExamType())) {
+            validateRegistration(req.getExamId(), req.getUserId());
+        }
+        
+        // Save answer
         UserAnswer answer = mappers.toEntity(req);
-        // Link to Exam entity to enable queries like findByExamIdAndUserId
-        Exam exam = examRepository.findById(req.getExamId()).orElseThrow();
         answer.setExam(exam);
         answer.setCreatedAt(LocalDateTime.now());
         return mappers.toResponse(userAnswerRepository.save(answer));
@@ -210,6 +248,41 @@ public class ExamService {
     // Additional CRUD methods
     public ExamResponse getExamById(Long id) {
         Exam exam = examRepository.findById(id).orElseThrow();
+        ExamResponse response = mappers.toResponse(exam);
+        
+        // Lấy danh sách câu hỏi theo thứ tự
+        List<ExamQuestion> examQuestions = examQuestionRepository.findByExamIdOrderByOrderNumberAsc(id);
+        if (!examQuestions.isEmpty()) {
+            List<Long> questionIds = examQuestions.stream()
+                    .map(ExamQuestion::getQuestionId)
+                    .toList();
+            
+            // Fetch full question details từ question-service
+            List<QuestionDTO> questions = new ArrayList<>();
+            for (Long questionId : questionIds) {
+                try {
+                    QuestionDTO question = questionServiceClient.getQuestionById(questionId);
+                    questions.add(question);
+                } catch (Exception e) {
+                    log.warn("Could not fetch question {}: {}", questionId, e.getMessage());
+                }
+            }
+            response.setQuestions(questions);
+        }
+        
+        return response;
+    }
+    
+    public ExamResponse getExamByIdWithUser(Long id, Long userId) {
+        // Fetch exam to check type
+        Exam exam = examRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Exam not found with id: " + id));
+        
+        // Validate registration only for non-PRACTICE exams
+        if (requiresRegistration(exam.getExamType())) {
+            validateRegistration(id, userId);
+        }
+        
         ExamResponse response = mappers.toResponse(exam);
         
         // Lấy danh sách câu hỏi theo thứ tự
@@ -421,6 +494,40 @@ public class ExamService {
         } catch (Exception e) {
             log.error("Error adding random questions to exam", e);
             throw new RuntimeException("Failed to add random questions: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Helper method to check if an exam type requires registration
+     * @param examType the type of exam (PRACTICE, VIRTUAL, RECRUITER)
+     * @return true if registration is required, false otherwise
+     * 
+     * PRACTICE and VIRTUAL exams do not require registration.
+     * Only RECRUITER exams require registration.
+     */
+    private boolean requiresRegistration(String examType) {
+        // Only RECRUITER exams require registration
+        return "RECRUITER".equalsIgnoreCase(examType);
+    }
+    
+    /**
+     * Helper method to validate that a user has a valid registration for an exam
+     * @param examId the exam ID
+     * @param userId the user ID
+     * @throws RuntimeException if registration is not valid
+     */
+    private void validateRegistration(Long examId, Long userId) {
+        if (!examRegistrationRepository.existsByExamIdAndUserId(examId, userId)) {
+            throw new RuntimeException("User must register for this exam before submitting");
+        }
+        
+        // Check registration status
+        ExamRegistration registration = examRegistrationRepository
+            .findByExamIdAndUserId(examId, userId)
+            .orElseThrow(() -> new RuntimeException("Registration not found"));
+        
+        if (!"REGISTERED".equals(registration.getRegistrationStatus())) {
+            throw new RuntimeException("Registration is not active");
         }
     }
     

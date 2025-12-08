@@ -20,6 +20,9 @@ public interface ExamRegistrationRepository extends JpaRepository<ExamRegistrati
     @Query("SELECT er FROM ExamRegistration er JOIN FETCH er.exam WHERE er.userId = :userId")
     Page<ExamRegistration> findByUserId(Long userId, Pageable pageable);
     
+    @Query("SELECT er FROM ExamRegistration er JOIN FETCH er.exam WHERE er.exam.id = :examId AND er.userId = :userId")
+    java.util.Optional<ExamRegistration> findByExamIdAndUserId(Long examId, Long userId);
+    
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ExamRegistration er WHERE er.exam.id = :examId")
     void deleteByExamId(Long examId);

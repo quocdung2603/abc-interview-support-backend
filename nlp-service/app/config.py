@@ -9,9 +9,12 @@ class Settings:
     SERVICE_PORT = int(os.getenv("NLP_SERVICE_PORT", 8088))
     SERVICE_VERSION = "1.0.0"
     
-    # External Services
-    QUESTION_SERVICE_URL = os.getenv("QUESTION_SERVICE_URL", "http://question-service:8085")
-    EXAM_SERVICE_URL = os.getenv("EXAM_SERVICE_URL", "http://exam-service:8086")
+    # External Services - All calls go through API Gateway
+    GATEWAY_URL = os.getenv("GATEWAY_URL", "http://gateway-service:8080")
+    
+    # Legacy service URLs (deprecated - use GATEWAY_URL instead)
+    # QUESTION_SERVICE_URL = os.getenv("QUESTION_SERVICE_URL", "http://question-service:8085")
+    # EXAM_SERVICE_URL = os.getenv("EXAM_SERVICE_URL", "http://exam-service:8086")
     AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8081")
     
     # JWT Configuration

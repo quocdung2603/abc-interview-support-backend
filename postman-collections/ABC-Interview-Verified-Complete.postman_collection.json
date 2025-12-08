@@ -1,4 +1,4 @@
-{
+﻿{
 	"info": {
 		"_postman_id": "abc-verified-complete-2025",
 		"name": "ABC Interview - Complete Verified Collection",
@@ -49,6 +49,11 @@
 		{
 			"key": "refreshToken",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:8080",
 			"type": "string"
 		}
 	],
