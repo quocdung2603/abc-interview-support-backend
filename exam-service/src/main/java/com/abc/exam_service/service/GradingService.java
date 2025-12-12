@@ -118,8 +118,8 @@ public class GradingService {
                 .collect(Collectors.toList());
         validateQuestionIds(examId, submittedQuestionIds);
         
-        // Step 2: Fetch correct answers from Question Service
-        log.info("Fetching correct answers for {} questions", submittedQuestionIds.size());
+        // Step 2: Fetch questions and answers from Question Service
+        log.info("Fetching questions and answers for {} questions", submittedQuestionIds.size());
         Map<Long, QuestionDTO> questions = questionServiceClient.getQuestionsWithAnswers(submittedQuestionIds);
         
         if (questions.size() < submittedQuestionIds.size()) {
@@ -127,7 +127,7 @@ public class GradingService {
                     submittedQuestionIds.size(), questions.size());
         }
         
-        // Step 3: Grade each answer
+        // Step 3: Grade each answer based on question type
         List<AnswerGradingDetail> gradingDetails = new ArrayList<>();
         int correctCount = 0;
         
@@ -141,15 +141,46 @@ public class GradingService {
                 continue;
             }
             
-            String correctAnswer = question.getQuestionAnswer();
-            
             // Handle empty/null answers
             if (userAnswer == null || userAnswer.trim().isEmpty()) {
                 userAnswer = "";
             }
             
-            // Grade the answer
-            boolean isCorrect = AnswerGrader.isCorrect(userAnswer, correctAnswer);
+            // Get question type
+            Long questionTypeId = question.getQuestionTypeId();
+            boolean isCorrect = false;
+            String correctAnswerDisplay = "";
+            
+            // Grade based on question type
+            if (questionTypeId == null) {
+                log.warn("Question {} has no questionTypeId, skipping", questionId);
+                continue;
+            } else if (questionTypeId == 1) {
+                // SingleChoice: fetch answers and check if selected ID is correct
+                List<com.abc.exam_service.dto.AnswerDTO> answersList = questionServiceClient.getAnswersByQuestionId(questionId);
+                isCorrect = AnswerGrader.gradeSingleChoice(userAnswer, answersList);
+                correctAnswerDisplay = answersList.stream()
+                        .filter(a -> Boolean.TRUE.equals(a.getIsCorrect()))
+                        .map(a -> String.valueOf(a.getId()))
+                        .findFirst()
+                        .orElse("");
+            } else if (questionTypeId == 2) {
+                // MultipleChoice: fetch answers and check if all correct IDs selected
+                List<com.abc.exam_service.dto.AnswerDTO> answersList = questionServiceClient.getAnswersByQuestionId(questionId);
+                isCorrect = AnswerGrader.gradeMultipleChoice(userAnswer, answersList);
+                correctAnswerDisplay = answersList.stream()
+                        .filter(a -> Boolean.TRUE.equals(a.getIsCorrect()))
+                        .map(a -> String.valueOf(a.getId()))
+                        .collect(java.util.stream.Collectors.joining(";"));
+            } else if (questionTypeId == 3) {
+                // Essay: check if length >= 10 characters
+                isCorrect = AnswerGrader.gradeEssay(userAnswer);
+                correctAnswerDisplay = question.getQuestionAnswer() != null ? question.getQuestionAnswer() : "";
+            } else {
+                log.warn("Unknown question type {} for question {}", questionTypeId, questionId);
+                continue;
+            }
+            
             if (isCorrect) {
                 correctCount++;
             }
@@ -169,7 +200,7 @@ public class GradingService {
                     .questionId(questionId)
                     .userAnswer(userAnswer)
                     .isCorrect(isCorrect)
-                    .correctAnswer(correctAnswer)
+                    .correctAnswer(correctAnswerDisplay)
                     .build();
             gradingDetails.add(detail);
         }
@@ -177,10 +208,21 @@ public class GradingService {
         // Step 4: Calculate score and determine pass/fail
         int totalQuestions = answers.size();
         double score = AnswerGrader.calculateScore(correctCount, totalQuestions);
-        boolean passStatus = AnswerGrader.determinePassStatus(score, PASS_THRESHOLD);
         
-        log.info("Grading complete: {}/{} correct, score: {:.2f}%, pass: {}", 
-                correctCount, totalQuestions, score, passStatus);
+        // Calculate dynamic pass threshold based on exam level
+        // Formula: 50×(1+0.10×(levelId−1))
+        double passThreshold = PASS_THRESHOLD; // Default 70%
+        if (exam.getLevelId() != null) {
+            passThreshold = 50.0 * (1 + 0.10 * (exam.getLevelId() - 1));
+            log.info("Dynamic pass threshold for levelId {}: {:.2f}%", exam.getLevelId(), passThreshold);
+        } else {
+            log.warn("Exam {} has no levelId, using default threshold: {:.2f}%", examId, passThreshold);
+        }
+        
+        boolean passStatus = AnswerGrader.determinePassStatus(score, passThreshold);
+        
+        log.info("Grading complete: {}/{} correct, score: {:.2f}%, pass: {} (threshold: {:.2f}%)", 
+                correctCount, totalQuestions, score, passStatus, passThreshold);
         
         // Step 5: Save Result entity
         Result result = new Result();
@@ -220,15 +262,48 @@ public class GradingService {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
         
-        // Fetch user answers ordered by creation time
-        List<UserAnswer> userAnswers = userAnswerRepository.findByExamIdAndUserIdOrderByCreatedAtAsc(examId, userId);
+        // Fetch top 2 results ordered by completedAt DESC to determine the latest attempt
+        List<Result> recentResults = resultRepository.findTop2ByExamIdAndUserIdOrderByCompletedAtDesc(examId, userId);
         
-        if (userAnswers.isEmpty()) {
-            log.info("No answers found for exam {} and user {}", examId, userId);
+        if (recentResults.isEmpty()) {
+            log.info("No results found for exam {} and user {} - user has not submitted", examId, userId);
             return ExamHistoryResponse.builder()
                     .examId(examId)
                     .userId(userId)
                     .examTitle(exam.getTitle())
+                    .answers(Collections.emptyList())
+                    .build();
+        }
+        
+        // Get the latest result
+        Result latestResult = recentResults.get(0);
+        java.time.LocalDateTime latestCompletedAt = latestResult.getCompletedAt();
+        
+        // Fetch user answers for the latest attempt only
+        List<UserAnswer> userAnswers;
+        if (recentResults.size() > 1) {
+            // Has previous attempt - filter between previous and latest completedAt
+            Result previousResult = recentResults.get(1);
+            java.time.LocalDateTime previousCompletedAt = previousResult.getCompletedAt();
+            userAnswers = userAnswerRepository.findByExamIdAndUserIdAndCreatedAtBetween(
+                    examId, userId, previousCompletedAt, latestCompletedAt);
+            log.info("Filtering answers between {} and {} for latest attempt", previousCompletedAt, latestCompletedAt);
+        } else {
+            // First attempt - get all answers up to latest completedAt
+            userAnswers = userAnswerRepository.findByExamIdAndUserIdAndCreatedAtBefore(
+                    examId, userId, latestCompletedAt);
+            log.info("Filtering answers up to {} for first attempt", latestCompletedAt);
+        }
+        
+        if (userAnswers.isEmpty()) {
+            log.warn("No answers found for latest attempt of exam {} and user {}", examId, userId);
+            return ExamHistoryResponse.builder()
+                    .examId(examId)
+                    .userId(userId)
+                    .examTitle(exam.getTitle())
+                    .score(latestResult.getScore())
+                    .passStatus(latestResult.getPassStatus())
+                    .completedAt(latestResult.getCompletedAt())
                     .answers(Collections.emptyList())
                     .build();
         }
@@ -255,16 +330,70 @@ public class GradingService {
             Long questionId = userAnswer.getQuestionId();
             QuestionDTO question = questions.get(questionId);
             
+            // Determine userAnswer display based on question type
+            String userAnswerDisplay = userAnswer.getAnswerContent();
+            Long questionTypeId = question != null ? question.getQuestionTypeId() : null;
+            
+            if ((questionTypeId == 1 || questionTypeId == 2) && userAnswer.getAnswerContent() != null && !userAnswer.getAnswerContent().trim().isEmpty()) {
+                try {
+                    // Parse selected answer IDs
+                    String[] selectedIds = userAnswer.getAnswerContent().split(";");
+                    List<com.abc.exam_service.dto.AnswerDTO> answersList = questionServiceClient.getAnswersByQuestionId(questionId);
+                    
+                    // Map answer IDs to their content
+                    java.util.Map<Long, String> answerIdToContent = answersList.stream()
+                            .collect(java.util.stream.Collectors.toMap(
+                                    com.abc.exam_service.dto.AnswerDTO::getId,
+                                    com.abc.exam_service.dto.AnswerDTO::getAnswerContent
+                            ));
+                    
+                    // Get content for selected IDs
+                    java.util.List<String> selectedContents = new java.util.ArrayList<>();
+                    for (String idStr : selectedIds) {
+                        try {
+                            Long answerId = Long.parseLong(idStr.trim());
+                            String content = answerIdToContent.get(answerId);
+                            if (content != null) {
+                                selectedContents.add(content);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Skip invalid IDs
+                        }
+                    }
+                    
+                    userAnswerDisplay = String.join(";", selectedContents);
+                } catch (Exception e) {
+                    // If parsing fails, keep original answer content
+                    log.warn("Failed to parse user answer for question {}: {}", questionId, userAnswer.getAnswerContent());
+                }
+            }
+            
             AnswerHistoryItem.AnswerHistoryItemBuilder itemBuilder = AnswerHistoryItem.builder()
                     .questionId(questionId)
                     .orderNumber(questionOrderMap.getOrDefault(questionId, 0))
-                    .userAnswer(userAnswer.getAnswerContent())
+                    .userAnswer(userAnswerDisplay)
                     .isCorrect(userAnswer.getIsCorrect());
             
             // Add question content and metadata if available
             if (question != null) {
-                itemBuilder.questionContent(question.getQuestionText())
-                        .correctAnswer(question.getQuestionAnswer());
+                itemBuilder.questionContent(question.getQuestionText());
+                
+                // Set correctAnswer based on question type
+                String correctAnswer = "";
+                
+                if (questionTypeId == 1 || questionTypeId == 2) {
+                    // For SingleChoice and MultipleChoice: get answers and filter correct ones
+                    List<com.abc.exam_service.dto.AnswerDTO> answersList = questionServiceClient.getAnswersByQuestionId(questionId);
+                    correctAnswer = answersList.stream()
+                            .filter(a -> Boolean.TRUE.equals(a.getIsCorrect()))
+                            .map(com.abc.exam_service.dto.AnswerDTO::getAnswerContent)
+                            .collect(java.util.stream.Collectors.joining(";"));
+                } else if (questionTypeId == 3) {
+                    // For Essay: use questionAnswer
+                    correctAnswer = question.getQuestionAnswer();
+                }
+                
+                itemBuilder.correctAnswer(correctAnswer);
                 
                 // Build metadata
                 QuestionMetadata metadata = QuestionMetadata.builder()
@@ -282,22 +411,16 @@ public class GradingService {
         // Sort by order number
         answerItems.sort(Comparator.comparing(AnswerHistoryItem::getOrderNumber));
         
-        // Fetch result if exists
-        Optional<Result> resultOpt = resultRepository.findTopByExamIdAndUserIdOrderByCompletedAtDesc(examId, userId);
-        
-        ExamHistoryResponse.ExamHistoryResponseBuilder responseBuilder = ExamHistoryResponse.builder()
+        // Build response with latest result data
+        return ExamHistoryResponse.builder()
                 .examId(examId)
                 .userId(userId)
                 .examTitle(exam.getTitle())
-                .answers(answerItems);
-        
-        resultOpt.ifPresent(result -> {
-            responseBuilder.score(result.getScore())
-                    .passStatus(result.getPassStatus())
-                    .completedAt(result.getCompletedAt());
-        });
-        
-        return responseBuilder.build();
+                .score(latestResult.getScore())
+                .passStatus(latestResult.getPassStatus())
+                .completedAt(latestResult.getCompletedAt())
+                .answers(answerItems)
+                .build();
     }
 
     /**

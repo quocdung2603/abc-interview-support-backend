@@ -23,6 +23,8 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     
     java.util.Optional<Result> findTopByExamIdAndUserIdOrderByCompletedAtDesc(Long examId, Long userId);
     
+    java.util.List<Result> findTop2ByExamIdAndUserIdOrderByCompletedAtDesc(Long examId, Long userId);
+    
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Result r WHERE r.exam.id = :examId")
     void deleteByExamId(Long examId);

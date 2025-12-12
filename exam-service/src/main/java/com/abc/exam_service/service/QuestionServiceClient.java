@@ -274,4 +274,56 @@ public class QuestionServiceClient {
         log.info("Successfully fetched {}/{} questions", result.size(), questionIds.size());
         return result;
     }
+    
+    /**
+     * Fetches all answers for a specific question.
+     * 
+     * @param questionId the question ID
+     * @return List of AnswerDTO
+     */
+    public List<com.abc.exam_service.dto.AnswerDTO> getAnswersByQuestionId(Long questionId) {
+        try {
+            String url = QUESTION_SERVICE_URL + "/questions/" + questionId + "/answers";
+            log.debug("Fetching answers for question {}: {}", questionId, url);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    Map.class
+            );
+            
+            Map<String, Object> pageResponse = response.getBody();
+            if (pageResponse == null || !pageResponse.containsKey("content")) {
+                log.warn("No answers found for question {}", questionId);
+                return java.util.Collections.emptyList();
+            }
+            
+            List<Map<String, Object>> answersData = (List<Map<String, Object>>) pageResponse.get("content");
+            if (answersData == null || answersData.isEmpty()) {
+                log.warn("No answers found for question {}", questionId);
+                return java.util.Collections.emptyList();
+            }
+            
+            return answersData.stream()
+                    .map(this::mapToAnswerDTO)
+                    .collect(java.util.stream.Collectors.toList());
+                    
+        } catch (Exception e) {
+            log.error("Error fetching answers for question {}", questionId, e);
+            return java.util.Collections.emptyList();
+        }
+    }
+    
+    private com.abc.exam_service.dto.AnswerDTO mapToAnswerDTO(Map<String, Object> map) {
+        com.abc.exam_service.dto.AnswerDTO dto = new com.abc.exam_service.dto.AnswerDTO();
+        dto.setId(((Number) map.get("id")).longValue());
+        dto.setQuestionId(((Number) map.get("questionId")).longValue());
+        dto.setAnswerContent((String) map.get("answerContent"));
+        dto.setIsCorrect((Boolean) map.get("isCorrect"));
+        if (map.get("orderNumber") != null) {
+            dto.setOrderNumber(((Number) map.get("orderNumber")).intValue());
+        }
+        return dto;
+    }
 }

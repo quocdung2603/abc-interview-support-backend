@@ -16,6 +16,19 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
     
     java.util.Optional<UserAnswer> findByExamIdAndUserIdAndQuestionId(Long examId, Long userId, Long questionId);
     
+    @Query("SELECT ua FROM UserAnswer ua WHERE ua.exam.id = :examId AND ua.userId = :userId AND ua.createdAt > :startTime AND ua.createdAt <= :endTime ORDER BY ua.createdAt ASC")
+    java.util.List<UserAnswer> findByExamIdAndUserIdAndCreatedAtBetween(
+        @org.springframework.data.repository.query.Param("examId") Long examId, 
+        @org.springframework.data.repository.query.Param("userId") Long userId, 
+        @org.springframework.data.repository.query.Param("startTime") java.time.LocalDateTime startTime, 
+        @org.springframework.data.repository.query.Param("endTime") java.time.LocalDateTime endTime);
+    
+    @Query("SELECT ua FROM UserAnswer ua WHERE ua.exam.id = :examId AND ua.userId = :userId AND ua.createdAt <= :endTime ORDER BY ua.createdAt ASC")
+    java.util.List<UserAnswer> findByExamIdAndUserIdAndCreatedAtBefore(
+        @org.springframework.data.repository.query.Param("examId") Long examId, 
+        @org.springframework.data.repository.query.Param("userId") Long userId, 
+        @org.springframework.data.repository.query.Param("endTime") java.time.LocalDateTime endTime);
+    
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM UserAnswer ua WHERE ua.exam.id = :examId")
     void deleteByExamId(Long examId);

@@ -73,6 +73,7 @@ public class AuthenticationUtil {
         boolean isAdmin = authorities.stream()
                 .anyMatch(auth -> {
                     String authority = auth.getAuthority();
+                    System.out.println("[DEBUG] getUserRole - Checking authority: " + authority);
                     return authority != null && (
                             authority.equals("ROLE_ADMIN") ||
                             authority.equals("ADMIN") ||
@@ -80,6 +81,7 @@ public class AuthenticationUtil {
                     );
                 });
 
+        System.out.println("[DEBUG] getUserRole - isAdmin: " + isAdmin);
         return isAdmin ? "ADMIN" : "USER";
     }
 
@@ -88,7 +90,13 @@ public class AuthenticationUtil {
      * @return true if user has admin role
      */
     public static boolean isAdmin() {
-        return "ADMIN".equals(getUserRole());
+        String role = getUserRole();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("[DEBUG] isAdmin check - Role: " + role);
+        if (authentication != null) {
+            System.out.println("[DEBUG] isAdmin - Authorities: " + authentication.getAuthorities());
+        }
+        return "ADMIN".equals(role);
     }
 
     /**

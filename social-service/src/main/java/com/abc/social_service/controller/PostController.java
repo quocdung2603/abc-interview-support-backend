@@ -114,4 +114,16 @@ public class PostController {
                     .body(null);
         }
     }
+    
+    @PutMapping("/{id}/reject")
+    @Operation(summary = "Reject a draft post (admin only)")
+    public ResponseEntity<PostResponse> rejectPost(@PathVariable Long id) {
+        try {
+            PostResponse response = postService.rejectPost(id);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null);
+        }
+    }
 }

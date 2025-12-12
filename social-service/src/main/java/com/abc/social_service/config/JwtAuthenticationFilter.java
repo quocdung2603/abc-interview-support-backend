@@ -102,9 +102,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             if (userId != null && roles != null) {
+                log.info("[JWT] Processing token for userId: {}, roles: {}", userId, roles);
                 List<SimpleGrantedAuthority> authorities = roles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .collect(Collectors.toList());
+                log.info("[JWT] Created authorities: {}", authorities);
 
                 // Create JWT object for AuthenticationUtil
                 Map<String, Object> headers = new HashMap<>();

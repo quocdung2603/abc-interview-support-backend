@@ -55,7 +55,7 @@ public class PostService {
         
         String userRole = AuthenticationUtil.getUserRole();
         if ("ADMIN".equals(userRole)) {
-            post.setStatus("PUBLISHED");
+            post.setStatus("DRAFT");
         } else {
             post.setStatus("DRAFT");
         }
@@ -80,7 +80,7 @@ public class PostService {
         post.setUserId(userId);
         
         if ("ADMIN".equals(userRole)) {
-            post.setStatus("PUBLISHED");
+            post.setStatus("DRAFT");
         } else {
             post.setStatus("DRAFT");
         }
@@ -107,14 +107,8 @@ public class PostService {
     }
     
     public Page<PostResponse> getAllPosts(Pageable pageable, String userRole, Long userId) {
-        Page<Post> posts;
-        
-        if ("ADMIN".equals(userRole)) {
-            posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
-        } else {
-            posts = postRepository.findPublishedOrOwnDrafts(userId, pageable);
-        }
-        
+        // Return all posts regardless of status (PUBLISHED, DRAFT, LOCKED)
+        Page<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
         return posts.map(this::enrichResponse);
     }
 
@@ -194,6 +188,42 @@ public class PostService {
         }
         
         post.setStatus("PUBLISHED");
+        Post updatedPost = postRepository.save(post);
+        return enrichResponse(updatedPost);
+    }
+    
+    @Transactional
+    public PostResponse rejectPost(Long id) {
+        if (!AuthenticationUtil.isAdmin()) {
+            throw new RuntimeException("Only administrators can reject posts");
+        }
+        
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFoundException(id));
+        
+        if (!"DRAFT".equals(post.getStatus())) {
+            throw new RuntimeException("Only draft posts can be rejected");
+        }
+        
+        post.setStatus("REJECTED");
+        Post updatedPost = postRepository.save(post);
+        return enrichResponse(updatedPost);
+    }
+    
+    @Transactional
+    public PostResponse rejectPost(Long id, String userRole) {
+        if (!"ADMIN".equals(userRole)) {
+            throw new RuntimeException("Only administrators can reject posts");
+        }
+        
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFoundException(id));
+        
+        if (!"DRAFT".equals(post.getStatus())) {
+            throw new RuntimeException("Only draft posts can be rejected");
+        }
+        
+        post.setStatus("REJECTED");
         Post updatedPost = postRepository.save(post);
         return enrichResponse(updatedPost);
     }
