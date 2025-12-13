@@ -190,7 +190,30 @@ public class ExamService {
 
     @Transactional
     public ExamRegistrationResponse registerForExam(ExamRegistrationRequest req) {
-        if (examRegistrationRepository.existsByExamIdAndUserId(req.getExamId(), req.getUserId())) {
+        // Check if user has a cancelled registration for this exam
+        java.util.Optional<ExamRegistration> cancelledRegistration = 
+                examRegistrationRepository.findByExamIdAndUserIdAndRegistrationStatus(
+                        req.getExamId(), req.getUserId(), "CANCELLED");
+        
+        if (cancelledRegistration.isPresent()) {
+            // Reactivate the cancelled registration
+            ExamRegistration registration = cancelledRegistration.get();
+            registration.setRegistrationStatus("REGISTERED");
+            registration.setRegisteredAt(LocalDateTime.now());
+            
+            ExamRegistration saved = examRegistrationRepository.save(registration);
+            
+            // Force load exam to avoid LazyInitializationException when mapping
+            if (saved.getExam() != null) {
+                saved.getExam().getId();
+            }
+            
+            return mappers.toResponse(saved);
+        }
+        
+        // Check if user already has an active registration
+        if (examRegistrationRepository.existsByExamIdAndUserIdAndRegistrationStatus(
+                req.getExamId(), req.getUserId(), "REGISTERED")) {
             throw new RuntimeException("Already registered for this exam");
         }
         
@@ -198,6 +221,7 @@ public class ExamService {
         Exam exam = examRepository.findById(req.getExamId())
                 .orElseThrow(() -> new RuntimeException("Exam not found with id: " + req.getExamId()));
         
+        // Create new registration
         ExamRegistration registration = mappers.toEntity(req);
         registration.setExam(exam); // Set the exam relationship
         registration.setRegistrationStatus("REGISTERED");
