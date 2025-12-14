@@ -12,6 +12,10 @@ public class VoteResponse {
     private Integer voteCount;
     private Double voteWeight;
     private Double weightedVoteScore;
-    private Double votePercentage;
+    private Double votePercentage;  // Deprecated
+    private Integer usefulVoteCount;
+    private Integer notUsefulVoteCount;
+    private Double usefulPercentage;
+    private Double notUsefulPercentage;
     private String message;
 }

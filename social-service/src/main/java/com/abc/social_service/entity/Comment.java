@@ -28,6 +28,18 @@ public class Comment {
     @Column(name = "weighted_vote_score")
     private Double weightedVoteScore;  // NEW: Sum of weighted votes
     
+    @Column(name = "useful_vote_count")
+    private Integer usefulVoteCount;  // NEW: Count of useful votes
+    
+    @Column(name = "not_useful_vote_count")
+    private Integer notUsefulVoteCount;  // NEW: Count of not useful votes
+    
+    @Column(name = "useful_percentage")
+    private Double usefulPercentage;  // NEW: Percentage of useful votes (weighted)
+    
+    @Column(name = "not_useful_percentage")
+    private Double notUsefulPercentage;  // NEW: Percentage of not useful votes (weighted)
+    
     @Column(name = "edit_count")
     private Integer editCount;  // NEW: Track number of edits
     
@@ -49,6 +61,18 @@ public class Comment {
         if (editCount == null) {
             editCount = 0;
         }
+        if (usefulVoteCount == null) {
+            usefulVoteCount = 0;
+        }
+        if (notUsefulVoteCount == null) {
+            notUsefulVoteCount = 0;
+        }
+        if (usefulPercentage == null) {
+            usefulPercentage = 50.0;  // Start at neutral 50%
+        }
+        if (notUsefulPercentage == null) {
+            notUsefulPercentage = 50.0;  // Start at neutral 50%
+        }
     }
     
     @PreUpdate
@@ -59,8 +83,13 @@ public class Comment {
     /**
      * Calculate vote percentage capped at 0-100%
      * @return Vote percentage
+     * @deprecated Use usefulPercentage and notUsefulPercentage instead
      */
+    @Deprecated
     public Double getVotePercentage() {
+        if (usefulPercentage != null) {
+            return usefulPercentage;  // Return new percentage field if available
+        }
         if (weightedVoteScore == null) {
             return 0.0;
         }

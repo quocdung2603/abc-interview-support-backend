@@ -73,6 +73,10 @@ public class VoteService {
         double scoreChange = "USEFUL".equals(effectiveVoteType) ? voteWeight : -voteWeight;
         commentService.updateWeightedVoteScore(request.getCommentId(), scoreChange);
         
+        // Update vote percentages (NEW)
+        boolean isUseful = "USEFUL".equals(effectiveVoteType);
+        commentService.updateVotePercentages(request.getCommentId(), voteWeight, isUseful);
+        
         // Increment vote count for backward compatibility
         commentService.incrementVoteCount(request.getCommentId());
         
@@ -90,7 +94,11 @@ public class VoteService {
             updatedComment.getVoteCount(),
             voteWeight,
             updatedComment.getWeightedVoteScore(),
-            updatedComment.getVotePercentage(),
+            updatedComment.getVotePercentage(),  // Deprecated field
+            updatedComment.getUsefulVoteCount(),
+            updatedComment.getNotUsefulVoteCount(),
+            updatedComment.getUsefulPercentage(),
+            updatedComment.getNotUsefulPercentage(),
             "Vote recorded successfully"
         );
     }

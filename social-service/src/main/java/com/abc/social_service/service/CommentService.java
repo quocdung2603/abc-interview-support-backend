@@ -109,6 +109,61 @@ public class CommentService {
                 commentId, scoreChange, comment.getWeightedVoteScore());
     }
     
+    /**
+     * Update vote percentages based on weighted voting system
+     * @param commentId The comment ID
+     * @param voteWeight The weight of the vote (0.5 to 2.5 based on ELO)
+     * @param isUseful true if USEFUL vote, false if NOT_USEFUL vote
+     */
+    @Transactional
+    public void updateVotePercentages(Long commentId, double voteWeight, boolean isUseful) {
+        Comment comment = getCommentEntityById(commentId);
+        
+        // Get current percentages (default to 50-50 if null)
+        Double currentUsefulPct = comment.getUsefulPercentage() != null ? comment.getUsefulPercentage() : 50.0;
+        Double currentNotUsefulPct = comment.getNotUsefulPercentage() != null ? comment.getNotUsefulPercentage() : 50.0;
+        
+        // Calculate shift amount based on vote weight
+        // Each 1.0 weight = 1% shift, scaled proportionally
+        double percentageShift = voteWeight;
+        
+        if (isUseful) {
+            // USEFUL vote: increase useful%, decrease not useful%
+            currentUsefulPct += percentageShift;
+            currentNotUsefulPct -= percentageShift;
+            
+            // Increment useful vote count
+            Integer usefulCount = comment.getUsefulVoteCount() != null ? comment.getUsefulVoteCount() : 0;
+            comment.setUsefulVoteCount(usefulCount + 1);
+        } else {
+            // NOT_USEFUL vote: decrease useful%, increase not useful%
+            currentUsefulPct -= percentageShift;
+            currentNotUsefulPct += percentageShift;
+            
+            // Increment not useful vote count
+            Integer notUsefulCount = comment.getNotUsefulVoteCount() != null ? comment.getNotUsefulVoteCount() : 0;
+            comment.setNotUsefulVoteCount(notUsefulCount + 1);
+        }
+        
+        // Ensure percentages stay within valid range [0, 100]
+        currentUsefulPct = Math.min(100.0, Math.max(0.0, currentUsefulPct));
+        currentNotUsefulPct = Math.min(100.0, Math.max(0.0, currentNotUsefulPct));
+        
+        // Normalize to ensure they sum to 100%
+        double total = currentUsefulPct + currentNotUsefulPct;
+        if (total > 0) {
+            currentUsefulPct = (currentUsefulPct / total) * 100.0;
+            currentNotUsefulPct = (currentNotUsefulPct / total) * 100.0;
+        }
+        
+        comment.setUsefulPercentage(currentUsefulPct);
+        comment.setNotUsefulPercentage(currentNotUsefulPct);
+        commentRepository.save(comment);
+        
+        log.debug("Updated vote percentages for comment {}: Useful={}%, NotUseful={}%", 
+                commentId, currentUsefulPct, currentNotUsefulPct);
+    }
+    
     @Transactional
     public CommentResponse updateComment(Long commentId, CommentUpdateRequest request) {
         Comment comment = getCommentEntityById(commentId);

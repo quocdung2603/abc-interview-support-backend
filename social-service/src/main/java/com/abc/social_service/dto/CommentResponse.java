@@ -12,7 +12,11 @@ public class CommentResponse {
     private String content;
     private Integer voteCount;
     private Double weightedVoteScore;
-    private Double votePercentage;
+    private Double votePercentage;  // Deprecated
+    private Integer usefulVoteCount;
+    private Integer notUsefulVoteCount;
+    private Double usefulPercentage;
+    private Double notUsefulPercentage;
     private Integer editCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -239,17 +239,23 @@ Write-Host ""
 Write-Host "Starting data import..." -ForegroundColor Yellow
 Write-Host ""
 
-# Clear existing user data to avoid conflicts with hashed passwords
-Write-Host "Clearing existing user data..." -ForegroundColor Yellow
+# Clear existing data to avoid conflicts
+Write-Host "Clearing existing data..." -ForegroundColor Yellow
 if ($USE_DOCKER_MODE) {
+    # Clear user data (hashed passwords)
     docker exec $CONTAINER_NAME psql -U $PG_USER -d userdb -c "TRUNCATE TABLE elo_history, users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
     docker exec $CONTAINER_NAME psql -U $PG_USER -d authdb -c "TRUNCATE TABLE users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
+    # Clear social data (to avoid duplicates)
+    docker exec $CONTAINER_NAME psql -U $PG_USER -d socialdb -c "TRUNCATE TABLE comment_votes, comments, posts RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
 } else {
     $env:PGPASSWORD = $PG_PASSWORD
+    # Clear user data
     & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d userdb -c "TRUNCATE TABLE elo_history, users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
     & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d authdb -c "TRUNCATE TABLE users RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
+    # Clear social data
+    & psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d socialdb -c "TRUNCATE TABLE comment_votes, comments, posts RESTART IDENTITY CASCADE;" 2>&1 | Out-Null
 }
-Write-Host "  User data cleared!" -ForegroundColor Green
+Write-Host "  Data cleared!" -ForegroundColor Green
 Write-Host ""
 
 $successCount = 0
