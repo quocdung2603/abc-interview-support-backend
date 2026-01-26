@@ -1,0 +1,75 @@
+*** DOCKER COMANDS ***
+
+1. Dừng tất cả containers: docker stop $(docker ps -aq)
+2. Xóa tất cả containers: docker rm $(docker ps -aq)
+3. Xóa tất cả images: docker rmi -f $(docker images -aq)
+4. Xóa tất cả Volumes: docker volume rm $(docker volume ls -q)
+5. Xóa tất cả Build cache: docker builder prune -a -f
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6. chay lenh them lai db portgress: docker exec interview-postgres psql -U postgres -c "CREATE DATABASE authdb"; docker exec interview-postgres psql -U postgres -c "CREATE DATABASE userdb"; docker exec interview-postgres psql -U postgres -c "CREATE DATABASE questiondb"; docker exec interview-postgres psql -U postgres -c "CREATE DATABASE examdb"; docker exec interview-postgres psql -U postgres -c "CREATE DATABASE careerdb"; docker exec interview-postgres psql -U postgres -c "CREATE DATABASE newsdb"; docker exec interview-postgres psql -U postgres -c "CREATE DATABASE socialdb"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+7. Chay lenh khi import thieu database
+- Copy file vào container
+docker cp "d:\Project Code\DOANTOTNGHIEP\abc-interview-support-backend\database-import\questiondb-sample-data.sql" interview-postgres:/tmp/questiondb-sample-data.sql
+
+- Import dữ liệu vào database socialdb
+docker exec -i interview-postgres psql -U postgres -d questiondb -f /tmp/questiondb-sample-data.sql
+
+8. Kiểm tra số lượng posts: docker exec -i interview-postgres psql -U postgres -d socialdb -c "SELECT COUNT(*) FROM posts"
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9. reset các id các bảng về 1
+# authdb
+docker exec -i interview-postgres psql -U postgres -d authdb -c "TRUNCATE TABLE users, roles RESTART IDENTITY CASCADE;"
+
+# userdb
+docker exec -i interview-postgres psql -U postgres -d userdb -c "TRUNCATE TABLE users, elo_history RESTART IDENTITY CASCADE;"
+
+# careerdb
+docker exec -i interview-postgres psql -U postgres -d careerdb -c "TRUNCATE TABLE career_preferences RESTART IDENTITY CASCADE;"
+
+# questiondb
+docker exec -i interview-postgres psql -U postgres -d questiondb -c "TRUNCATE TABLE answers, questions, topics, question_types, levels, fields RESTART IDENTITY CASCADE;"
+
+# examdb
+docker exec -i interview-postgres psql -U postgres -d examdb -c "TRUNCATE TABLE user_answers, results, exam_registrations, exam_questions, exams RESTART IDENTITY CASCADE;"
+
+# newsdb
+docker exec -i interview-postgres psql -U postgres -d newsdb -c "TRUNCATE TABLE news RESTART IDENTITY CASCADE;"
+
+# socialdb
+docker exec -i interview-postgres psql -U postgres -d socialdb -c "TRUNCATE TABLE comment_votes, comments, posts RESTART IDENTITY CASCADE;"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9. kiểm tra db đã có dữ liệu chưa
+	# authdb
+	docker exec -i interview-postgres psql -U postgres -d authdb -c "SELECT 'authdb.users' as table_name, COUNT(*) as count FROM users UNION ALL SELECT 'authdb.roles', COUNT(*) FROM roles;"
+
+	# userdb
+	docker exec -i interview-postgres psql -U postgres -d userdb -c "SELECT 'userdb.users' as table_name, COUNT(*) as count FROM users UNION ALL SELECT 'userdb.elo_history', COUNT(*) FROM elo_history;"
+
+	# careerdb
+	docker exec -i interview-postgres psql -U postgres -d careerdb -c "SELECT 'careerdb.career_preferences' as table_name, COUNT(*) as count FROM career_preferences;"
+
+	# questiondb
+	docker exec -i interview-postgres psql -U postgres -d questiondb -c "SELECT 'questiondb.fields' as table_name, COUNT(*) as count FROM fields UNION ALL SELECT 'questiondb.topics', COUNT(*) FROM topics UNION ALL SELECT 'questiondb.levels', COUNT(*) FROM levels UNION ALL SELECT 'questiondb.question_types', COUNT(*) FROM question_types UNION ALL SELECT 'questiondb.questions', COUNT(*) FROM questions UNION ALL SELECT 'questiondb.answers', COUNT(*) FROM answers;"
+
+	# examdb
+	docker exec -i interview-postgres psql -U postgres -d examdb -c "SELECT 'examdb.exams' as table_name, COUNT(*) as count FROM exams UNION ALL SELECT 'examdb.exam_questions', COUNT(*) FROM exam_questions UNION ALL SELECT 'examdb.exam_registrations', COUNT(*) FROM exam_registrations UNION ALL SELECT 'examdb.results', COUNT(*) FROM results UNION ALL SELECT 'examdb.user_answers', COUNT(*) FROM user_answers;"
+
+	# newsdb
+	docker exec -i interview-postgres psql -U postgres -d newsdb -c "SELECT 'newsdb.news' as table_name, COUNT(*) as count FROM news;"
+
+	# socialdb
+	docker exec -i interview-postgres psql -U postgres -d socialdb -c "SELECT 'socialdb.posts' as table_name, COUNT(*) as count FROM posts UNION ALL SELECT 'socialdb.comments', COUNT(*) FROM comments UNION ALL SELECT 'socialdb.comment_votes', COUNT(*) FROM comment_votes;"
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10. kiểm tra danh sách các bảng trong docker
+# Kiểm tra các database khác
+docker exec -i interview-postgres psql -U postgres -d authdb -c "\dt"
+docker exec -i interview-postgres psql -U postgres -d userdb -c "\dt"
+docker exec -i interview-postgres psql -U postgres -d questiondb -c "\dt"
+docker exec -i interview-postgres psql -U postgres -d examdb -c "\dt"
+docker exec -i interview-postgres psql -U postgres -d newsdb -c "\dt"
+docker exec -i interview-postgres psql -U postgres -d careerdb -c "\dt"
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11. Vừa build vừa chạy lại service trong 1 lệnh: docker-compose up -d --build social-service
